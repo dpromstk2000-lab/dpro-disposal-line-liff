@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#164f48">
+  <meta name="description" content="DPRO 不用品回収・遺品整理 LINE 現場スタッフ画面">
+  <title>DPRO 不用品回収・遺品整理｜現場スタッフ</title>
+  <script src="config.js"></script>
+  <style>
+    :root{
+      --deep:#123f3b;--main:#226b62;--main2:#3f877d;--pale:#e9f4f1;--cream:#fbf7ec;
+      --ink:#152d2a;--muted:#60736f;--line:#d5e2df;--white:#fff;--danger:#a33d36;
+      --dangerbg:#fff0ee;--warn:#a8660b;--warnbg:#fff5df;--ok:#16715f;--okbg:#e9f7f1;
+      --shadow:0 13px 40px rgba(18,63,59,.13);--radius:18px
+    }
+    *{box-sizing:border-box}
+    html{font-size:16px;scroll-behavior:smooth}
+    body{margin:0;background:#f2f7f5;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif;line-height:1.65}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    a{color:var(--main)}
+    .hidden{display:none!important}
+    .top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+    .topin{max-width:1180px;margin:auto;padding:10px 15px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .mark{width:43px;height:43px;border-radius:14px;background:linear-gradient(135deg,var(--deep),var(--main2));color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px;flex:0 0 auto}
+    .brand strong{display:block;font-size:16px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand small{display:block;color:var(--muted);font-size:12px}
+    .top-actions{display:flex;align-items:center;gap:8px}
+    .api-pill{border-radius:999px;padding:7px 10px;background:var(--pale);color:var(--ok);font-size:12px;font-weight:900;white-space:nowrap}
+    .iconbtn{border:1px solid var(--line);background:#fff;border-radius:12px;min-height:42px;padding:8px 12px;font-weight:900;color:var(--ink)}
+    .hero{background:linear-gradient(135deg,var(--deep),#23685f 68%,#477d70);color:#fff}
+    .heroin{max-width:1180px;margin:auto;padding:26px 18px 38px}
+    .eyebrow{display:inline-flex;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.12);border-radius:999px;padding:4px 11px;font-size:12px;font-weight:900}
+    .hero h1{font-size:clamp(27px,4vw,39px);line-height:1.3;margin:10px 0 5px}
+    .hero p{margin:0;color:#dceee9}
+    .toolbar{max-width:1180px;margin:-22px auto 0;padding:0 14px;position:relative;z-index:5}
+    .toolbar-card{background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:19px;padding:15px;display:grid;grid-template-columns:1.1fr .9fr auto;gap:12px;align-items:end}
+    .field label{display:block;font-weight:900;margin-bottom:5px;font-size:14px}
+    .field input,.field select,.field textarea{width:100%;border:2px solid var(--line);background:#fff;border-radius:12px;min-height:49px;padding:10px 12px;outline:none;color:var(--ink)}
+    .field textarea{min-height:105px;resize:vertical}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--main);box-shadow:0 0 0 4px rgba(34,107,98,.11)}
+    .date-nav{display:flex;gap:7px}
+    .date-nav button{border:1px solid var(--line);background:#f7faf9;border-radius:11px;min-width:46px;min-height:49px;font-weight:900}
+    .main{max-width:1180px;margin:18px auto 55px;padding:0 14px}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:16px}
+    .kpi{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+    .kpi small{display:block;color:var(--muted);font-weight:800}
+    .kpi strong{display:block;font-size:29px;line-height:1.2;margin-top:3px}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:20px 1px 10px}
+    .section-head h2{font-size:22px;margin:0}
+    .section-head span{font-size:13px;color:var(--muted)}
+    .tasks{display:grid;gap:12px}
+    .task{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 7px 25px rgba(18,63,59,.07)}
+    .task-main{display:grid;grid-template-columns:105px 1fr auto;gap:15px;padding:17px;align-items:center}
+    .task-time{font-size:25px;font-weight:900;color:var(--deep);text-align:center;border-right:1px solid var(--line);padding-right:15px}
+    .task-time small{display:block;font-size:12px;color:var(--muted);font-weight:800}
+    .task-info h3{font-size:19px;margin:0 0 4px}
+    .task-info p{margin:2px 0;color:var(--muted)}
+    .task-info .customer{color:var(--ink);font-weight:900}
+    .task-actions{display:grid;gap:7px;min-width:126px}
+    .btn{border:0;border-radius:13px;min-height:49px;padding:10px 15px;font-weight:900}
+    .primary{background:linear-gradient(135deg,var(--deep),var(--main));color:#fff;box-shadow:0 7px 18px rgba(18,63,59,.18)}
+    .secondary{background:#edf4f2;color:var(--ink);border:1px solid #d5e5e1}
+    .outline{background:#fff;color:var(--main);border:2px solid #9dc9bf}
+    .warnbtn{background:var(--warnbg);color:#86530c;border:1px solid #ead2a0}
+    .dangerbtn{background:var(--dangerbg);color:var(--danger);border:1px solid #edc6c2}
+    .status{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:900;white-space:nowrap;background:#eef3f2;color:var(--muted)}
+    .status.scheduled{background:var(--warnbg);color:#8a580c}
+    .status.arrived,.status.in_progress{background:#e7f0fb;color:#1b5d91}
+    .status.completed{background:var(--okbg);color:var(--ok)}
+    .task-foot{display:flex;gap:8px;flex-wrap:wrap;padding:10px 17px 14px;border-top:1px solid #edf2f0;background:#fbfdfc}
+    .quicklink{display:inline-flex;align-items:center;justify-content:center;gap:5px;text-decoration:none;border-radius:10px;background:#fff;border:1px solid var(--line);min-height:41px;padding:7px 12px;font-weight:900;color:var(--ink)}
+    .empty{background:#fff;border:1px dashed #b9ceca;border-radius:16px;padding:34px 18px;text-align:center;color:var(--muted)}
+    .empty strong{display:block;color:var(--ink);font-size:18px;margin-bottom:4px}
+    .login{position:fixed;inset:0;z-index:200;background:linear-gradient(145deg,#e8f3f0,#fbf8ef);display:grid;place-items:center;padding:18px}
+    .login-card{width:min(520px,100%);background:#fff;border:1px solid var(--line);border-radius:23px;box-shadow:0 25px 75px rgba(18,63,59,.22);overflow:hidden}
+    .login-head{background:linear-gradient(135deg,var(--deep),var(--main));color:#fff;padding:25px 24px}
+    .login-head h1{font-size:27px;margin:5px 0}
+    .login-head p{margin:0;color:#d9ece7}
+    .login-body{padding:23px 24px}
+    .code-row{display:grid;grid-template-columns:1fr auto;gap:8px}
+    .login-error{display:none;background:var(--dangerbg);color:#812e29;border:1px solid #efc7c3;border-radius:12px;padding:11px 13px;margin-bottom:13px;font-weight:800}
+    .login-error.show{display:block}
+    .drawer-backdrop{position:fixed;inset:0;background:rgba(10,35,32,.62);z-index:100;display:none}
+    .drawer-backdrop.show{display:block}
+    .drawer{position:fixed;right:0;top:0;bottom:0;width:min(760px,100%);background:#f3f7f5;z-index:110;transform:translateX(105%);transition:.25s;overflow:auto;box-shadow:-18px 0 55px rgba(0,0,0,.24)}
+    .drawer.show{transform:translateX(0)}
+    .drawer-top{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);padding:12px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .drawer-top strong{font-size:18px}
+    .drawer-body{padding:14px 14px 70px}
+    .summary{background:linear-gradient(135deg,var(--deep),var(--main));color:#fff;border-radius:18px;padding:18px;margin-bottom:12px}
+    .summary small{color:#cfe5df}
+    .summary h2{font-size:25px;margin:4px 0}
+    .summary p{margin:3px 0}
+    .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}
+    .contact-grid a{color:var(--deep);background:#fff;text-decoration:none;border-radius:12px;min-height:48px;display:flex;align-items:center;justify-content:center;font-weight:900}
+    .workflow{background:#fff;border:1px solid var(--line);border-radius:17px;padding:16px;margin-bottom:12px}
+    .workflow h3,.card h3{font-size:19px;margin:0 0 11px}
+    .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:13px}
+    .step{position:relative;text-align:center;color:var(--muted);font-size:11px;font-weight:800}
+    .step:before{content:"";display:block;width:26px;height:26px;border-radius:50%;background:#dce6e3;margin:0 auto 5px;border:4px solid #eef3f2;position:relative;z-index:2}
+    .step:not(:last-child):after{content:"";position:absolute;height:4px;background:#dce6e3;top:11px;left:58%;right:-42%}
+    .step.done:before,.step.current:before{background:var(--main)}
+    .step.done:after{background:var(--main)}
+    .step.current:before{box-shadow:0 0 0 4px rgba(34,107,98,.16)}
+    .workflow-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:17px;margin-bottom:12px;overflow:hidden}
+    .card-head{padding:14px 16px 11px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .card-head h3{margin:0}
+    .card-body{padding:15px 16px}
+    .info{display:grid;grid-template-columns:105px 1fr;gap:7px 12px}
+    .info dt{color:var(--muted);font-size:13px}
+    .info dd{margin:0;font-weight:800;white-space:pre-wrap}
+    .items{display:grid;gap:8px}
+    .item{border:1px solid var(--line);background:#fcfdfc;border-radius:12px;padding:11px 12px}
+    .item strong{display:block}
+    .item small{color:var(--muted)}
+    .buyback{display:inline-block;background:var(--warnbg);color:#86530c;border-radius:999px;padding:3px 7px;font-size:11px;font-weight:900;margin-top:5px}
+    .upload-box{border:2px dashed #92bfb5;background:#f2faf7;border-radius:15px;padding:17px;text-align:center}
+    .upload-box input{display:none}
+    .upload-label{display:block;font-weight:900;color:var(--deep);cursor:pointer}
+    .upload-label small{display:block;color:var(--muted);font-weight:500;margin-top:3px}
+    .preview{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:11px 0}
+    .preview figure{margin:0;position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:#e8efed}
+    .preview img{width:100%;height:100%;object-fit:cover}
+    .preview button{position:absolute;right:4px;top:4px;border:0;background:rgba(0,0,0,.72);color:#fff;border-radius:50%;width:28px;height:28px;font-weight:900}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+    .full{grid-column:1/-1}
+    .checks{display:grid;gap:8px;margin:12px 0}
+    .check{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--line);border-radius:11px;padding:10px 11px;background:#fcfdfc}
+    .check input{width:21px;height:21px;margin-top:2px;flex:0 0 auto}
+    .recent-photo{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border-bottom:1px solid #edf1f0;padding:9px 0}
+    .recent-photo:last-child{border-bottom:0}
+    .toast{position:fixed;left:50%;bottom:18px;z-index:400;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#173e3a;color:#fff;border-radius:13px;padding:12px 16px;box-shadow:0 12px 35px rgba(0,0,0,.25);font-weight:900;transition:.2s;max-width:min(92vw,650px)}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .toast.error{background:#8b332d}
+    .loading{position:fixed;inset:0;z-index:350;background:rgba(11,39,36,.72);display:none;place-items:center;color:#fff;text-align:center;padding:20px}
+    .loading.show{display:grid}
+    .spinner{width:50px;height:50px;border:5px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 13px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .demo{position:fixed;right:10px;bottom:10px;z-index:60;background:#825619;color:#fff;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:900;display:none}
+    .demo.show{display:block}
+    @media(max-width:760px){
+      .brand strong{font-size:14px}.brand small{display:none}.mark{width:39px;height:39px}
+      .topin{padding:8px 10px}.api-pill{display:none}.iconbtn{padding:7px 9px;font-size:13px}
+      .heroin{padding:22px 14px 33px}.hero h1{font-size:28px}
+      .toolbar{padding:0 9px}.toolbar-card{grid-template-columns:1fr;gap:9px;padding:12px}
+      .date-nav{display:grid;grid-template-columns:46px 1fr 46px}.date-nav .field{display:contents}
+      .main{padding:0 9px;margin-top:14px}.kpis{grid-template-columns:1fr 1fr;gap:8px}
+      .kpi{padding:11px 13px}.kpi strong{font-size:25px}
+      .task-main{grid-template-columns:76px 1fr;padding:14px 12px;gap:11px}
+      .task-time{font-size:21px;padding-right:10px}.task-actions{grid-column:1/-1;grid-template-columns:1fr 1fr;min-width:0}
+      .task-foot{padding:9px 12px 12px}.quicklink{flex:1}
+      .workflow-actions{grid-template-columns:1fr}.contact-grid{grid-template-columns:1fr 1fr}
+      .grid2{grid-template-columns:1fr}.full{grid-column:1}
+      .preview{grid-template-columns:repeat(2,1fr)}
+      .drawer-body{padding-left:9px;padding-right:9px}.summary{padding:16px}
+      .steps{gap:0}.step{font-size:10px}.info{grid-template-columns:90px 1fr}
+    }
+  </style>
+</head>
+<body>
+  <section class="login" id="loginView">
+    <div class="login-card">
+      <div class="login-head">
+        <div class="eyebrow">現場スタッフ専用</div>
+        <h1>本日の訪問・作業を確認</h1>
+        <p>到着、作業開始、写真、完了報告を現場から登録します。</p>
+      </div>
+      <div class="login-body">
+        <div class="login-error" id="loginError"></div>
+        <div class="field">
+          <label>管理コード</label>
+          <div class="code-row">
+            <input id="adminCode" type="password" inputmode="numeric" autocomplete="one-time-code" placeholder="管理コードを入力">
+            <button class="iconbtn" id="clearAdmin" type="button">削除</button>
+          </div>
+        </div>
+        <button class="btn primary" id="loginBtn" type="button" style="width:100%;margin-top:15px">スタッフ画面を開く</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="appView" class="hidden">
+    <header class="top">
+      <div class="topin">
+        <div class="brand"><div class="mark">D</div><div><strong>DPRO 不用品回収・遺品整理</strong><small>現場スタッフ</small></div></div>
+        <div class="top-actions"><span class="api-pill" id="apiStatus">API接続中</span><a class="iconbtn" href="owner.html?demo=1">管理画面</a><button class="iconbtn" id="logoutBtn" type="button">終了</button></div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="heroin"><span class="eyebrow">スマホ・iPad対応</span><h1>本日の現場</h1><p id="heroText">予定と作業状況を確認しています。</p></div>
+    </section>
+
+    <section class="toolbar">
+      <div class="toolbar-card">
+        <div class="field"><label>表示するスタッフ</label><select id="staffSelect"></select></div>
+        <div class="date-nav">
+          <button id="prevDate" type="button" aria-label="前日">←</button>
+          <div class="field"><label>日付</label><input id="workDate" type="date"></div>
+          <button id="nextDate" type="button" aria-label="翌日">→</button>
+        </div>
+        <button class="btn secondary" id="reloadBtn" type="button">最新情報に更新</button>
+      </div>
+    </section>
+
+    <main class="main">
+      <section class="kpis">
+        <div class="kpi"><small>予定件数</small><strong id="kpiAll">0</strong></div>
+        <div class="kpi"><small>未着手</small><strong id="kpiPending">0</strong></div>
+        <div class="kpi"><small>対応中</small><strong id="kpiProgress">0</strong></div>
+        <div class="kpi"><small>完了</small><strong id="kpiDone">0</strong></div>
+      </section>
+      <div class="section-head"><h2 id="listTitle">本日の予定</h2><span id="listSub"></span></div>
+      <section class="tasks" id="taskList"></section>
+    </main>
+  </div>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-top"><div><small id="drawerNo"></small><strong id="drawerTitle">案件詳細</strong></div><button class="iconbtn" id="drawerClose" type="button">閉じる</button></div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <div class="toast" id="toast"></div>
+  <div class="loading" id="loading"><div><div class="spinner"></div><strong id="loadingText">読み込み中</strong><div id="loadingSub"></div></div></div>
+  <div class="demo" id="demoBadge">DEMO</div>
+
+  <script>
+  (() => {
+    'use strict';
+    const $=id=>document.getElementById(id);
+    const CFG=window.DPRO_DISPOSAL_CONFIG||{};
+    const API=String(CFG.API_BASE||'https://dpro-disposal-line-api.dpromstk2000.workers.dev').replace(/\/$/,'');
+    const COMPANY=CFG.COMPANY_CODE||'dpro_disposal_demo';
+    const params=new URLSearchParams(location.search);
+    const IS_DEMO=params.get('demo')==='1'||COMPANY.includes('demo');
+    const STATUS_LABELS={received:'相談受付',reviewing:'内容確認中',rough_estimate:'概算案内',visit_scheduled:'現地見積予定',visit_completed:'現地見積済み',estimate_sent:'見積案内済み',contracted:'成約',work_scheduled:'作業予定',in_progress:'作業中',completion_check:'完了確認',completed:'作業完了',payment_completed:'精算完了',cancel_requested:'取消相談',cancelled:'取消'};
+    const SERVICE_LABELS={junk_removal:'不用品回収',estate_clearance:'遺品整理',pre_life_organization:'生前整理',vacant_property:'空き家・残置物整理',hoarding_cleanup:'ゴミ屋敷・大量処分',moving_cleanup:'引越し前後の片付け',cleanup_with_buyback:'買取を含む整理',other:'その他'};
+    const APPOINTMENT_LABELS={visit_estimate:'現地見積り',work:'回収・整理作業',follow_up:'フォロー'};
+    const ITEM_LABELS={furniture:'家具',appliance:'家電',bedding:'寝具',clothing:'衣類',tableware:'食器',book:'本・書類',bicycle:'自転車',vehicle:'車両関連',office_item:'事務用品',hazardous_or_restricted:'要確認品',buyback_candidate:'買取希望品',mixed:'まとめて・混在',other:'その他'};
+    const state={admin:'',staff:[],cases:[],day:null,current:null,currentAppointment:null,photos:[],fallback:false};
+
+    async function api(path,opt={}){
+      const url=new URL(API+path);url.searchParams.set('company_code',COMPANY);
+      const headers={...(opt.headers||{})};if(state.admin)headers['x-admin-code']=state.admin;
+      if(opt.body&&!(opt.body instanceof FormData)&&!headers['content-type'])headers['content-type']='application/json';
+      const res=await fetch(url,{...opt,headers,cache:'no-store'});
+      const text=await res.text();let data={};try{data=text?JSON.parse(text):{}}catch{data={ok:false,error:{message:text||'通信内容を読み取れません。'}}}
+      if(!res.ok||data.ok===false)throw new Error(data?.error?.message||data?.message||`通信エラー (${res.status})`);
+      return data
+    }
+    const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const attr=v=>esc(v).replace(/`/g,'&#96;');
+    const num=v=>Number(v||0).toLocaleString('ja-JP');
+    function localDate(d){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(d)}
+    function today(){return localDate(new Date())}
+    function dateLabel(v){if(!v)return'―';const d=new Date(v+'T00:00:00+09:00');return new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',weekday:'short'}).format(d)}
+    function dt(v){if(!v)return'―';return new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(v))}
+    function tm(v){if(!v)return'―';return new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit'}).format(new Date(v))}
+    function normalizePhone(v){let s=String(v||'').normalize('NFKC').replace(/[^0-9+]/g,'');if(s.startsWith('+81'))s='0'+s.slice(3);return s.replace(/\D/g,'')}
+    function formatPhone(v){const s=normalizePhone(v);if(/^0[789]0\d{8}$/.test(s))return `${s.slice(0,3)}-${s.slice(3,7)}-${s.slice(7)}`;if(/^0\d{9}$/.test(s))return `${s.slice(0,3)}-${s.slice(3,6)}-${s.slice(6)}`;return s}
+    function addressOf(c){return [c?.work_city,c?.work_address1,c?.work_address2,c?.floor_text].filter(Boolean).join(' ')||'住所未登録'}
+    function statusLabel(v){return STATUS_LABELS[v]||v||'未設定'}
+    function appointmentStatus(v){return({requested:'希望受付',coordinating:'調整中',scheduled:'予定',reminded:'案内済み',arrived:'到着',in_progress:'対応中',completed:'完了',reschedule_requested:'変更相談',cancelled:'取消',no_show:'未実施'})[v]||v||'予定'}
+    function showLoading(show,a='読み込み中',b=''){ $('loading').classList.toggle('show',show);$('loadingText').textContent=a;$('loadingSub').textContent=b}
+    function toast(m,tone=''){const e=$('toast');e.textContent=m;e.className='toast show'+(tone?' '+tone:'');clearTimeout(toast.t);toast.t=setTimeout(()=>e.className='toast',3800)}
+    function loginError(m){const e=$('loginError');e.textContent=m;e.classList.toggle('show',!!m)}
+
+    async function login(){
+      const code=$('adminCode').value.trim();if(!code)return loginError('管理コードを入力してください。');
+      state.admin=code;showLoading(true,'スタッフ画面を開いています');
+      try{
+        await api('/api/public/config');
+        sessionStorage.setItem('dpro_disposal_staff_admin',code);
+        $('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('apiStatus').textContent='API接続OK';
+        await reloadAll()
+      }catch(e){
+        state.admin='';loginError(e.message);$('apiStatus').textContent='API接続エラー'
+      }finally{showLoading(false)}
+    }
+
+    async function reloadAll(){
+      showLoading(true,'予定を更新しています');
+      try{
+        const dayValue=$('workDate').value||today();
+        const [casesRes,dayRes]=await Promise.all([api('/api/admin/cases?limit=200'),api('/api/admin/day?date='+encodeURIComponent(dayValue))]);
+        state.cases=casesRes.cases||[];state.day=dayRes;state.staff=dayRes.staff||casesRes.staff||state.staff;
+        state.fallback=false;renderStaffOptions();renderAll()
+      }catch(e){
+        if(IS_DEMO){useFallback();renderStaffOptions();renderAll();toast('API応答を取得できなかったため、画面確認用データを表示しています。','error')}
+        else toast(e.message,'error')
+      }finally{showLoading(false)}
+    }
+
+    function demoAt(days,h,m=0){const d=new Date(Date.now()+days*86400000);return new Date(`${localDate(d)}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00+09:00`).toISOString()}
+    function useFallback(){
+      const staff=[{id:'staff-demo-1',staff_name:'山田 一郎'},{id:'staff-demo-2',staff_name:'佐藤 花子'}];
+      const customer1={id:'cus1',customer_name:'回収 太郎',customer_no:'DC-000001',phone:'090-1111-3201'};
+      const customer2={id:'cus2',customer_name:'整理 花子',customer_no:'DC-000002',phone:'090-1111-3202'};
+      const c1={id:'case1',case_no:'DS-DEMO-000001',title:'引越し前の家具・家電回収',service_type:'junk_removal',status:'work_scheduled',work_city:'糟屋郡志免町',work_address1:'志免1-2-3',floor_text:'2階',property_type:'マンション',access_note:'建物前に短時間駐車可能。エレベーターあり。',customer_note:'冷蔵庫内は空です。ベッドは解体をお願いします。',assigned_staff_id:'staff-demo-1',disposal_customers:customer1,disposal_staff:staff[0],disposal_items:[{item_name:'冷蔵庫',category:'appliance',quantity:1,unit:'台',buyback_candidate:false},{item_name:'シングルベッド',category:'furniture',quantity:1,unit:'台',buyback_candidate:false},{item_name:'テレビ',category:'appliance',quantity:1,unit:'台',buyback_candidate:true,buyback_amount:5000}],disposal_progress_reports:[],disposal_photos:[]};
+      const c2={id:'case2',case_no:'DS-DEMO-000002',title:'ご実家の遺品整理・現地確認',service_type:'estate_clearance',status:'visit_scheduled',work_city:'糟屋郡須恵町',work_address1:'旅石4-5-6',property_type:'戸建て',access_note:'玄関前に駐車1台可。仏壇と重要書類は処分しない。',customer_note:'残す物を現地で一緒に確認します。',assigned_staff_id:'staff-demo-2',disposal_customers:customer2,disposal_staff:staff[1],disposal_items:[{item_name:'家具・衣類・食器',category:'mixed',quantity:1,unit:'式',buyback_candidate:false},{item_name:'茶道具',category:'buyback_candidate',quantity:1,unit:'式',buyback_candidate:true}],disposal_progress_reports:[],disposal_photos:[]};
+      const a1={id:'appt1',case_id:c1.id,appointment_type:'work',status:'scheduled',start_at:demoAt(0,9),end_at:demoAt(0,12),assigned_staff_id:'staff-demo-1',vehicle_note:'2t車・2名',customer_note:'到着前に電話',internal_note:'養生材を持参',disposal_staff:staff[0],disposal_cases:c1};
+      const a2={id:'appt2',case_id:c2.id,appointment_type:'visit_estimate',status:'scheduled',start_at:demoAt(0,14),end_at:demoAt(0,15),assigned_staff_id:'staff-demo-2',vehicle_note:'軽バン',customer_note:'ご家族同席',internal_note:'買取査定票を持参',disposal_staff:staff[1],disposal_cases:c2};
+      c1.disposal_appointments=[a1];c2.disposal_appointments=[a2];
+      state.staff=staff;state.cases=[c1,c2];state.day={appointments:[a1,a2],staff};state.fallback=true
+    }
+
+    function renderStaffOptions(){
+      const select=$('staffSelect'),saved=localStorage.getItem('dpro_disposal_staff_id')||'',cur=select.value||saved;
+      select.innerHTML='<option value="">全スタッフ・未割当を表示</option>'+state.staff.map(s=>`<option value="${attr(s.id)}">${esc(s.staff_name)}</option>`).join('');
+      if([...select.options].some(o=>o.value===cur))select.value=cur
+    }
+
+    function filteredAppointments(){
+      const id=$('staffSelect').value;let rows=[...(state.day?.appointments||[])];
+      if(id)rows=rows.filter(a=>(a.assigned_staff_id||a.disposal_staff?.id)===id);
+      return rows.sort((a,b)=>String(a.start_at).localeCompare(String(b.start_at)))
+    }
+
+    function renderAll(){
+      const rows=filteredAppointments(),selected=$('staffSelect').selectedOptions[0]?.textContent||'全スタッフ';
+      const pending=rows.filter(a=>!['arrived','in_progress','completed','cancelled','no_show'].includes(a.status)).length;
+      const progress=rows.filter(a=>['arrived','in_progress'].includes(a.status)).length;
+      const done=rows.filter(a=>a.status==='completed').length;
+      $('kpiAll').textContent=num(rows.length);$('kpiPending').textContent=num(pending);$('kpiProgress').textContent=num(progress);$('kpiDone').textContent=num(done);
+      const d=$('workDate').value;$('listTitle').textContent=`${dateLabel(d)}の予定`;$('listSub').textContent=selected;
+      $('heroText').textContent=`${dateLabel(d)}｜${selected}｜予定 ${rows.length}件`;
+      $('taskList').innerHTML=rows.length?rows.map(taskHtml).join(''):`<div class="empty"><strong>この日の予定はありません</strong>日付またはスタッフを変更して確認してください。</div>`;
+      document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openAppointment(b.dataset.open))
+    }
+
+    function taskHtml(a){
+      const c=findCaseForAppointment(a),customer=c?.disposal_customers||a.disposal_cases?.disposal_customers||{},address=addressOf(c||a.disposal_cases||{});
+      const phone=normalizePhone(customer.phone),maps='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(address);
+      return `<article class="task">
+        <div class="task-main">
+          <div class="task-time">${tm(a.start_at)}<small>〜 ${tm(a.end_at)}</small></div>
+          <div class="task-info">
+            <div><span class="status ${attr(a.status)}">${esc(appointmentStatus(a.status))}</span> <span class="status">${esc(APPOINTMENT_LABELS[a.appointment_type]||a.appointment_type)}</span></div>
+            <h3>${esc(c?.title||a.disposal_cases?.title||'訪問・作業')}</h3>
+            <p class="customer">${esc(customer.customer_name||'お客様名未登録')} 様</p>
+            <p>${esc(address)}</p>
+            <p>担当：${esc(a.disposal_staff?.staff_name||c?.disposal_staff?.staff_name||'未割当')} ${a.vehicle_note?'｜'+esc(a.vehicle_note):''}</p>
+          </div>
+          <div class="task-actions"><button class="btn primary" data-open="${attr(a.id)}" type="button">案件を開く</button><button class="btn secondary" data-open="${attr(a.id)}" type="button">写真・報告</button></div>
+        </div>
+        <div class="task-foot">${phone?`<a class="quicklink" href="tel:${attr(phone)}">電話 ${esc(formatPhone(phone))}</a>`:''}<a class="quicklink" href="${attr(maps)}" target="_blank" rel="noopener">地図を開く</a><span class="quicklink">${esc(c?.case_no||a.disposal_cases?.case_no||'')}</span></div>
+      </article>`
+    }
+
+    function findCaseForAppointment(a){
+      const embedded=a.disposal_cases||{};
+      return state.cases.find(c=>c.id===(a.case_id||embedded.id)||c.case_no===embedded.case_no)||embedded
+    }
+
+    async function openAppointment(id){
+      const a=(state.day?.appointments||[]).find(x=>String(x.id)===String(id));if(!a)return toast('予定が見つかりません。','error');
+      const base=findCaseForAppointment(a);showLoading(true,'案件詳細を読み込んでいます');
+      try{
+        let c=base;
+        if(!state.fallback&&base?.id){const r=await api('/api/admin/case?id='+encodeURIComponent(base.id));c=r.case}
+        state.current=c;state.currentAppointment=(c.disposal_appointments||[]).find(x=>String(x.id)===String(a.id))||a;state.photos=[];
+        renderDrawer();$('drawerBackdrop').classList.add('show');$('drawer').classList.add('show');$('drawer').setAttribute('aria-hidden','false')
+      }catch(e){toast(e.message,'error')}finally{showLoading(false)}
+    }
+
+    function closeDrawer(){$('drawerBackdrop').classList.remove('show');$('drawer').classList.remove('show');$('drawer').setAttribute('aria-hidden','true');state.photos.forEach(x=>URL.revokeObjectURL(x.url));state.photos=[]}
+
+    function workflowIndex(status){return status==='completed'?3:status==='in_progress'?2:status==='arrived'?1:0}
+    function renderDrawer(){
+      const c=state.current,a=state.currentAppointment,customer=c.disposal_customers||{},address=addressOf(c),phone=normalizePhone(customer.phone);
+      $('drawerNo').textContent=c.case_no||'';$('drawerTitle').textContent=c.title||SERVICE_LABELS[c.service_type]||'案件詳細';
+      const idx=workflowIndex(a.status);
+      $('drawerBody').innerHTML=`
+        <section class="summary">
+          <small>${esc(APPOINTMENT_LABELS[a.appointment_type]||a.appointment_type)}｜${tm(a.start_at)}〜${tm(a.end_at)}</small>
+          <h2>${esc(customer.customer_name||'お客様')} 様</h2>
+          <p>${esc(address)}</p><p>担当：${esc(a.disposal_staff?.staff_name||c.disposal_staff?.staff_name||'未割当')}｜${esc(a.vehicle_note||'車両情報なし')}</p>
+          <div class="contact-grid">${phone?`<a href="tel:${attr(phone)}">電話する</a>`:'<a href="#" onclick="return false">電話未登録</a>'}<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}" target="_blank" rel="noopener">地図を開く</a></div>
+        </section>
+
+        <section class="workflow">
+          <h3>現場の進行</h3>
+          <div class="steps">${['予定','到着','作業中','完了'].map((x,i)=>`<div class="step ${i<idx?'done':i===idx?'current':''}">${x}</div>`).join('')}</div>
+          <div class="workflow-actions">
+            <button class="btn outline" id="arriveBtn" type="button" ${idx>=1?'disabled':''}>到着を記録</button>
+            <button class="btn warnbtn" id="startBtn" type="button" ${idx>=2?'disabled':''}>作業開始</button>
+            <button class="btn primary" id="completeBtn" type="button" ${idx>=3?'disabled':''}>完了登録</button>
+          </div>
+        </section>
+
+        <article class="card"><div class="card-head"><h3>現場・お客様情報</h3><span class="status">${esc(statusLabel(c.status))}</span></div><div class="card-body">
+          <dl class="info"><dt>住所</dt><dd>${esc(address)}</dd><dt>建物</dt><dd>${esc(c.property_type||'―')} ${esc(c.floor_text||'')}</dd><dt>搬出・駐車</dt><dd>${esc(c.parking_note||c.access_note||'―')}</dd><dt>お客様メモ</dt><dd>${esc(c.customer_note||'―')}</dd><dt>予定メモ</dt><dd>${esc(a.customer_note||'―')}</dd><dt>内部注意</dt><dd>${esc(a.internal_note||c.internal_note||'―')}</dd></dl>
+        </div></article>
+
+        <article class="card"><div class="card-head"><h3>回収品・買取候補</h3><span>${num(c.disposal_items?.length)}件</span></div><div class="card-body"><div class="items">${renderItems(c.disposal_items||[])}</div></div></article>
+
+        <article class="card"><div class="card-head"><h3>現場写真</h3><span>非公開が標準</span></div><div class="card-body">
+          <div class="upload-box"><label class="upload-label" for="photoFile">カメラで撮影・写真を選択<small>作業前・作業中・作業後の写真を複数登録できます。</small></label><input id="photoFile" type="file" accept="image/*" capture="environment" multiple></div>
+          <div class="preview" id="photoPreview"></div>
+          <div class="grid2">
+            <div class="field"><label>写真区分</label><select id="photoPhase"><option>作業前</option><option>作業中</option><option>作業後</option><option>買取査定</option><option>重要品・確認品</option></select></div>
+            <div class="field"><label>公開範囲</label><select id="photoVisibility"><option value="internal_only">社内のみ</option><option value="customer_public">お客様にも公開</option></select></div>
+            <div class="field full"><label>写真メモ</label><input id="photoCaption" placeholder="例：搬出前のリビング全景"></div>
+          </div>
+          <button class="btn primary" id="uploadBtn" type="button" style="width:100%;margin-top:12px">選択した写真を保存</button>
+          <div id="existingPhotos" style="margin-top:12px">${renderExistingPhotos(c.disposal_photos||[])}</div>
+        </div></article>
+
+        <article class="card"><div class="card-head"><h3>進捗・作業報告</h3></div><div class="card-body">
+          <div class="grid2">
+            <div class="field"><label>報告タイトル</label><select id="reportTitle"><option>現地確認を行いました</option><option>作業を開始しました</option><option>作業が完了しました</option><option>買取候補品を確認しました</option><option>追加確認が必要です</option></select></div>
+            <div class="field"><label>公開範囲</label><select id="reportVisibility"><option value="customer_public">お客様にも公開</option><option value="internal_only">社内のみ</option></select></div>
+            <div class="field full"><label>お客様への報告</label><textarea id="reportCustomer" placeholder="例：予定していた回収作業が完了しました。"></textarea></div>
+            <div class="field full"><label>社内メモ</label><textarea id="reportInternal" placeholder="追加料金、残置品、買取査定などの内部情報"></textarea></div>
+          </div>
+          <button class="btn secondary" id="reportBtn" type="button" style="width:100%;margin-top:12px">報告を保存</button>
+        </div></article>
+
+        <article class="card" id="completionCard"><div class="card-head"><h3>完了前チェック</h3></div><div class="card-body">
+          <div class="checks">
+            <label class="check"><input type="checkbox" class="complete-check"><span>回収・整理する品と残す品を確認した</span></label>
+            <label class="check"><input type="checkbox" class="complete-check"><span>貴重品・重要書類・思い出の品の確認を行った</span></label>
+            <label class="check"><input type="checkbox" class="complete-check"><span>作業後の写真を撮影した</span></label>
+            <label class="check"><input type="checkbox" class="complete-check"><span>お客様または立会者へ作業内容を説明した</span></label>
+          </div>
+          <p style="color:var(--muted);font-size:13px;margin:0">すべて確認後、「完了登録」を押してください。精算はオーナーPC画面で確定します。</p>
+        </div></article>`;
+      $('arriveBtn').onclick=()=>advance('arrived');$('startBtn').onclick=()=>advance('in_progress');$('completeBtn').onclick=()=>advance('completed');
+      $('photoFile').onchange=selectPhotos;$('uploadBtn').onclick=uploadPhotos;$('reportBtn').onclick=saveReport;
+      document.querySelectorAll('[data-photo]').forEach(b=>b.onclick=()=>viewPhoto(b.dataset.photo))
+    }
+
+    function renderItems(rows){return rows.length?rows.map(x=>`<div class="item"><strong>${esc(x.item_name||ITEM_LABELS[x.category]||'品目')}　${num(x.quantity||1)}${esc(x.unit||'点')}</strong><small>${esc(ITEM_LABELS[x.category]||x.category||'')}</small>${x.buyback_candidate?`<div class="buyback">買取候補 ${x.buyback_amount?num(x.buyback_amount)+'円':'査定確認中'}</div>`:''}</div>`).join(''):'<div class="empty">回収品の詳細は未登録です。</div>'}
+    function renderExistingPhotos(rows){return rows.length?rows.slice().sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at))).map(x=>`<div class="recent-photo"><div><strong>${esc(x.caption||'現場写真')}</strong><div style="color:var(--muted);font-size:12px">${esc(x.visibility==='customer_public'?'お客様公開':'社内のみ')}｜${dt(x.created_at)}</div></div><button class="iconbtn" type="button" data-photo="${attr(x.id)}">開く</button></div>`).join(''):'<div style="color:var(--muted);font-size:13px">保存済み写真はありません。</div>'}
+
+    function selectPhotos(){
+      state.photos.forEach(x=>URL.revokeObjectURL(x.url));state.photos=[...$('photoFile').files].map(file=>({file,url:URL.createObjectURL(file)}));
+      $('photoPreview').innerHTML=state.photos.map((x,i)=>`<figure><img src="${attr(x.url)}" alt="選択写真"><button type="button" data-remove-photo="${i}">×</button></figure>`).join('');
+      document.querySelectorAll('[data-remove-photo]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.removePhoto);URL.revokeObjectURL(state.photos[i].url);state.photos.splice(i,1);const dt=new DataTransfer();state.photos.forEach(x=>dt.items.add(x.file));$('photoFile').files=dt.files;selectPhotos()})
+    }
+
+    async function uploadPhotos(){
+      if(!state.photos.length)return toast('写真を撮影または選択してください。','error');
+      if(state.fallback)return toast('画面確認用データでは写真保存を行いません。','error');
+      const btn=$('uploadBtn');btn.disabled=true;showLoading(true,'写真を保存しています',`${state.photos.length}枚`);
+      try{
+        const phase=$('photoPhase').value,caption=$('photoCaption').value.trim(),visibility=$('photoVisibility').value;
+        for(const x of state.photos){
+          const fd=new FormData();fd.append('case_id',state.current.id);fd.append('file',x.file);fd.append('photo_type','owner_record');fd.append('caption',`【${phase}】${caption||x.file.name}`);fd.append('visibility',visibility);
+          await api('/api/admin/photos/upload',{method:'POST',body:fd})
+        }
+        toast(`${state.photos.length}枚の写真を保存しました。`);await refreshCurrent()
+      }catch(e){toast(e.message,'error')}finally{btn.disabled=false;showLoading(false)}
+    }
+
+    async function saveReport(){
+      const title=$('reportTitle').value,customer=$('reportCustomer').value.trim(),internal=$('reportInternal').value.trim();
+      if(!customer&&!internal)return toast('お客様への報告または社内メモを入力してください。','error');
+      if(state.fallback)return toast('画面確認用データでは報告保存を行いません。','error');
+      const btn=$('reportBtn');btn.disabled=true;
+      try{
+        await api('/api/admin/progress/save',{method:'POST',body:JSON.stringify({case_id:state.current.id,status:state.current.status,title,customer_comment:customer,internal_comment:internal,visibility:$('reportVisibility').value})});
+        toast('作業報告を保存しました。');await refreshCurrent()
+      }catch(e){toast(e.message,'error')}finally{btn.disabled=false}
+    }
+
+    function nextCaseState(step,a){
+      if(step==='arrived')return {status:state.current.status,next_action:a.appointment_type==='visit_estimate'?'現地確認中':'作業開始'};
+      if(step==='in_progress')return {status:a.appointment_type==='work'?'in_progress':state.current.status,next_action:a.appointment_type==='visit_estimate'?'現地見積り完了':'作業完了確認'};
+      if(a.appointment_type==='visit_estimate')return {status:'visit_completed',next_action:'見積り作成・ご案内'};
+      if(a.appointment_type==='work')return {status:'completion_check',next_action:'作業内容・精算確認'};
+      return {status:state.current.status,next_action:'対応内容を確認'}
+    }
+
+    async function advance(step){
+      if(step==='completed'){
+        const checks=[...document.querySelectorAll('.complete-check')];if(!checks.every(x=>x.checked)){document.getElementById('completionCard').scrollIntoView({behavior:'smooth',block:'center'});return toast('完了前チェックをすべて確認してください。','error')}
+      }
+      if(state.fallback){state.currentAppointment.status=step;renderDrawer();renderAll();return toast('画面確認用データの表示を更新しました。')}
+      const labels={arrived:'到着',in_progress:'作業開始',completed:'完了'};
+      if(!confirm(`${labels[step]}を登録します。よろしいですか？`))return;
+      const a=state.currentAppointment,c=state.current,next=nextCaseState(step,a);showLoading(true,`${labels[step]}を登録しています`);
+      let appointmentWarning='';
+      try{
+        try{
+          await api('/api/admin/appointments/save',{method:'POST',body:JSON.stringify({id:a.id,case_id:c.id,appointment_type:a.appointment_type,status:step,start_at:a.start_at,end_at:a.end_at,assigned_staff_id:a.assigned_staff_id||a.disposal_staff?.id||null,vehicle_note:a.vehicle_note||'',customer_note:a.customer_note||'',internal_note:a.internal_note||''})})
+        }catch(e){appointmentWarning=e.message}
+        await api('/api/admin/cases/status',{method:'POST',body:JSON.stringify({case_id:c.id,status:next.status,assigned_staff_id:c.assigned_staff_id||a.assigned_staff_id||null,next_action:next.next_action,next_action_at:null,internal_note:c.internal_note||''})});
+        if(step!=='arrived'){
+          const title=step==='in_progress'?(a.appointment_type==='visit_estimate'?'現地確認を開始しました':'作業を開始しました'):(a.appointment_type==='visit_estimate'?'現地確認が完了しました':'作業が完了しました');
+          await api('/api/admin/progress/save',{method:'POST',body:JSON.stringify({case_id:c.id,status:next.status,title,customer_comment:title+'。担当者より内容をご案内します。',internal_comment:'現場スタッフ画面から登録',visibility:'customer_public'})})
+        }
+        toast(appointmentWarning?`${labels[step]}を登録しました。予定表示の更新のみ要確認です。`:`${labels[step]}を登録しました。`);
+        await reloadAll();closeDrawer()
+      }catch(e){toast(e.message,'error')}finally{showLoading(false)}
+    }
+
+    async function refreshCurrent(){
+      const r=await api('/api/admin/case?id='+encodeURIComponent(state.current.id));state.current=r.case;
+      const a=(r.case.disposal_appointments||[]).find(x=>String(x.id)===String(state.currentAppointment.id));if(a)state.currentAppointment=a;
+      state.photos.forEach(x=>URL.revokeObjectURL(x.url));state.photos=[];renderDrawer()
+    }
+
+    async function viewPhoto(id){
+      if(state.fallback)return toast('画面確認用データには実写真がありません。','error');
+      showLoading(true,'写真を開いています');
+      try{const r=await api('/api/admin/photo-url?photo_id='+encodeURIComponent(id));window.open(r.photo.signed_url,'_blank','noopener')}
+      catch(e){toast(e.message,'error')}finally{showLoading(false)}
+    }
+
+    async function changeDate(days){
+      const d=new Date(($('workDate').value||today())+'T00:00:00+09:00');d.setDate(d.getDate()+days);$('workDate').value=localDate(d);await reloadAll()
+    }
+    function logout(){sessionStorage.removeItem('dpro_disposal_staff_admin');state.admin='';$('adminCode').value='';$('appView').classList.add('hidden');$('loginView').classList.remove('hidden');closeDrawer()}
+    function init(){
+      $('workDate').value=today();if(IS_DEMO){$('adminCode').value='1234';$('demoBadge').classList.add('show')}
+      $('loginBtn').onclick=login;$('adminCode').addEventListener('keydown',e=>{if(e.key==='Enter')login()});$('clearAdmin').onclick=()=>{$('adminCode').value='';$('adminCode').focus()};
+      $('logoutBtn').onclick=logout;$('reloadBtn').onclick=reloadAll;$('prevDate').onclick=()=>changeDate(-1);$('nextDate').onclick=()=>changeDate(1);$('workDate').onchange=reloadAll;
+      $('staffSelect').onchange=()=>{localStorage.setItem('dpro_disposal_staff_id',$('staffSelect').value);renderAll()};
+      $('drawerClose').onclick=closeDrawer;$('drawerBackdrop').onclick=closeDrawer;document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
+      const saved=sessionStorage.getItem('dpro_disposal_staff_admin');if(saved){$('adminCode').value=saved;login()}
+    }
+    init()
+  })();
+  </script>
+</body>
+</html>
