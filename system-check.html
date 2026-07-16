@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#174f4a">
   <meta name="description" content="DPRO 不用品回収・遺品整理 LINE 営業前システムチェック">
-  <title>DPRO 不用品回収・遺品整理｜営業前システムチェック</title>
+  <title>DPRO 不用品回収・遺品整理｜営業前システムチェック R1</title>
   <script src="config.js"></script>
   <style>
     :root{
@@ -194,7 +194,7 @@
     </section>
   </main>
 
-  <footer>DPRO 不用品回収・遺品整理 LINE｜system-check.html</footer>
+  <footer>DPRO 不用品回収・遺品整理 LINE｜system-check.html｜DISPOSAL-7-R1</footer>
   <div class="toast" id="toast"></div>
   <div class="loading" id="loading"><div><div class="spinner"></div><strong id="loadingText">確認しています</strong><div id="loadingSub"></div></div></div>
   <div class="demo-badge" id="demoBadge">DEMO</div>
@@ -237,7 +237,7 @@
     function tomorrow(){const d=new Date();d.setDate(d.getDate()+1);return localDate(d)}
     function yesterday(){const d=new Date();d.setDate(d.getDate()-1);return localDate(d)}
     function isPastLocal(value){if(!value)return false;return new Date(value+':00+09:00').getTime()<Date.now()}
-    function isHalfHour(value){if(!value)return false;const d=new Date(value);const m=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Tokyo',minute:'2-digit'}).format(d);return m==='00'||m==='30'}
+    function isHalfHour(value){if(!value)return false;const d=new Date(value);if(Number.isNaN(d.getTime()))return false;const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(d);const m=Number(parts.find(x=>x.type==='minute')?.value);return m===0||m===30}
     function showLoading(on,a='確認しています',b=''){$('loading').classList.toggle('show',!!on);$('loadingText').textContent=a;$('loadingSub').textContent=b}
     function toast(m,tone=''){const e=$('toast');e.textContent=m;e.className='toast show'+(tone?' '+tone:'');clearTimeout(toast.t);toast.t=setTimeout(()=>e.className='toast',3600)}
     function adminCode(){return $('adminCode').value.trim()}
