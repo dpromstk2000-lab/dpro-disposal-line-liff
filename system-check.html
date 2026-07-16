@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#174f4a">
+  <meta name="description" content="DPRO 不用品回収・遺品整理 LINE 営業前システムチェック">
+  <title>DPRO 不用品回収・遺品整理｜営業前システムチェック</title>
+  <script src="config.js"></script>
+  <style>
+    :root{
+      --deep:#123f3b;--main:#286d65;--main2:#43867d;--pale:#e8f3f0;--cream:#fbf8f0;
+      --gold:#a9783e;--ink:#172d2a;--muted:#5d716e;--line:#d5e2df;--white:#fff;
+      --danger:#a13c35;--dangerbg:#fff0ee;--warn:#9a620f;--warnbg:#fff6df;
+      --ok:#17705f;--okbg:#e9f7f1;--info:#266797;--infobg:#edf5fc;
+      --shadow:0 13px 38px rgba(18,63,59,.12);--radius:18px
+    }
+    *{box-sizing:border-box}
+    html{font-size:16px;scroll-behavior:smooth}
+    body{margin:0;background:#f2f7f5;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif;line-height:1.65}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    a{color:var(--main)}
+    .top{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+    .topin{max-width:1180px;margin:auto;padding:10px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--deep),var(--main2));color:#fff;display:grid;place-items:center;font-weight:900;font-size:19px;flex:0 0 auto}
+    .brand strong{display:block;font-size:16px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand small{display:block;color:var(--muted);font-size:12px}
+    .toplinks{display:flex;gap:8px;align-items:center}
+    .toplinks a{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;min-height:41px;padding:8px 12px;border-radius:11px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:900;white-space:nowrap}
+    .hero{background:linear-gradient(132deg,var(--deep),#286d65 72%,#4b8072);color:#fff}
+    .heroin{max-width:1180px;margin:auto;padding:34px 20px 55px}
+    .eyebrow{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.12);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:900}
+    .hero h1{font-size:clamp(29px,5vw,44px);line-height:1.25;margin:12px 0 6px}
+    .hero p{margin:0;color:#dceee9;font-size:17px}
+    .wrap{max-width:1180px;margin:-31px auto 55px;padding:0 16px;position:relative}
+    .control{background:#fff;border:1px solid var(--line);border-radius:21px;box-shadow:var(--shadow);padding:18px;margin-bottom:15px}
+    .control-grid{display:grid;grid-template-columns:minmax(240px,1fr) auto;gap:14px;align-items:end}
+    .field label{display:block;font-weight:900;margin-bottom:5px}
+    .code-row{display:grid;grid-template-columns:1fr auto;gap:8px}
+    .field input{width:100%;min-height:51px;border:2px solid var(--line);border-radius:12px;padding:11px 13px;outline:none}
+    .field input:focus{border-color:var(--main);box-shadow:0 0 0 4px rgba(40,109,101,.12)}
+    .help{font-size:13px;color:var(--muted);margin-top:5px}
+    .actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{border:0;border-radius:13px;min-height:51px;padding:11px 17px;font-weight:900}
+    .primary{background:linear-gradient(135deg,var(--deep),var(--main));color:#fff;box-shadow:0 7px 18px rgba(18,63,59,.18)}
+    .secondary{background:#edf4f2;color:var(--ink);border:1px solid #d3e2df}
+    .demo-btn{background:var(--warnbg);color:#82510b;border:1px solid #e8c98d}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .statusbar{display:grid;grid-template-columns:1.2fr repeat(4,.7fr);gap:10px;margin-bottom:15px}
+    .summary{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px 15px}
+    .summary small{display:block;color:var(--muted);font-weight:800}
+    .summary strong{display:block;font-size:27px;line-height:1.25;margin-top:3px}
+    .summary.main strong{font-size:19px}
+    .summary.pass strong{color:var(--ok)}
+    .summary.warn strong{color:var(--warn)}
+    .summary.fail strong{color:var(--danger)}
+    .summary.pending strong{color:var(--muted)}
+    .meta{background:#fff;border:1px solid var(--line);border-radius:18px;margin-bottom:15px;overflow:hidden}
+    .meta-head{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .meta-head h2{font-size:20px;margin:0}
+    .api-pill{display:inline-flex;align-items:center;border-radius:999px;padding:6px 10px;background:#eef3f2;color:var(--muted);font-size:12px;font-weight:900}
+    .api-pill.ok{background:var(--okbg);color:var(--ok)}
+    .api-pill.bad{background:var(--dangerbg);color:var(--danger)}
+    .meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+    .meta-item{padding:14px 17px;border-right:1px solid var(--line)}
+    .meta-item:last-child{border-right:0}
+    .meta-item small{display:block;color:var(--muted)}
+    .meta-item strong{display:block;word-break:break-word}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:21px 2px 10px}
+    .section-head h2{font-size:23px;margin:0}
+    .section-head span{font-size:13px;color:var(--muted)}
+    .checks{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+    .check{background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px;display:grid;grid-template-columns:42px 1fr;gap:12px;min-height:126px}
+    .check-icon{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#eef3f2;color:var(--muted);font-weight:900;font-size:18px}
+    .check.running .check-icon{background:var(--infobg);color:var(--info);animation:pulse 1s infinite}
+    .check.pass{border-color:#b9ded3}
+    .check.pass .check-icon{background:var(--okbg);color:var(--ok)}
+    .check.warn{border-color:#ead39e}
+    .check.warn .check-icon{background:var(--warnbg);color:var(--warn)}
+    .check.fail{border-color:#ecc4c0}
+    .check.fail .check-icon{background:var(--dangerbg);color:var(--danger)}
+    @keyframes pulse{50%{opacity:.45}}
+    .check h3{font-size:17px;margin:0 0 3px}
+    .check p{margin:0;color:var(--muted);font-size:13px}
+    .result{margin-top:8px;padding-top:8px;border-top:1px solid #edf1f0;font-size:13px;font-weight:800;white-space:pre-wrap;word-break:break-word}
+    .result.pass{color:var(--ok)}
+    .result.warn{color:var(--warn)}
+    .result.fail{color:var(--danger)}
+    .links{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .linkcard{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;text-decoration:none;color:var(--ink)}
+    .linkcard strong{display:block;font-size:16px}
+    .linkcard small{display:block;color:var(--muted);margin-top:4px;word-break:break-all}
+    .report{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:16px}
+    .report-head{padding:14px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .report-head h2{font-size:20px;margin:0}
+    .report-body{padding:15px 17px}
+    .report-body textarea{width:100%;min-height:190px;border:1px solid var(--line);border-radius:12px;padding:12px;background:#f9fbfa;color:var(--ink);font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical}
+    .notice{background:var(--cream);border:1px solid #eadbbd;border-radius:14px;padding:12px 14px;margin-top:12px;color:#6f542e}
+    .toast{position:fixed;left:50%;bottom:18px;z-index:100;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#173e3a;color:#fff;border-radius:13px;padding:12px 16px;box-shadow:0 12px 35px rgba(0,0,0,.25);font-weight:900;transition:.2s;max-width:min(92vw,650px)}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .toast.error{background:#8b332d}
+    .loading{position:fixed;inset:0;z-index:90;background:rgba(11,39,36,.72);display:none;place-items:center;color:#fff;text-align:center;padding:20px}
+    .loading.show{display:grid}
+    .spinner{width:50px;height:50px;border:5px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 13px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .demo-badge{position:fixed;right:11px;bottom:11px;z-index:45;background:#825619;color:#fff;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:900;display:none}
+    .demo-badge.show{display:block}
+    footer{text-align:center;color:var(--muted);font-size:13px;padding:18px}
+    @media(max-width:850px){
+      .control-grid{grid-template-columns:1fr}.actions{justify-content:stretch}.actions .btn{flex:1}
+      .statusbar{grid-template-columns:1fr 1fr}.summary.main{grid-column:1/-1}
+      .meta-grid{grid-template-columns:1fr 1fr}.meta-item:nth-child(2){border-right:0}.meta-item:nth-child(-n+2){border-bottom:1px solid var(--line)}
+      .checks{grid-template-columns:1fr}.links{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:560px){
+      .topin{padding:8px 10px}.brand small{display:none}.brand strong{font-size:14px}.mark{width:40px;height:40px}
+      .toplinks a:not(:first-child){display:none}.heroin{padding:27px 14px 47px}.hero h1{font-size:29px}.hero p{font-size:15px}
+      .wrap{padding:0 9px}.control{padding:14px}.code-row{grid-template-columns:1fr auto}
+      .actions{display:grid;grid-template-columns:1fr 1fr}.actions .primary{grid-column:1/-1}
+      .statusbar{gap:8px}.summary{padding:11px 12px}.summary strong{font-size:24px}
+      .meta-grid{grid-template-columns:1fr}.meta-item{border-right:0;border-bottom:1px solid var(--line)!important}.meta-item:last-child{border-bottom:0!important}
+      .check{grid-template-columns:37px 1fr;padding:13px;gap:10px}.check-icon{width:37px;height:37px}
+      .links{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="topin">
+      <div class="brand"><div class="mark">D</div><div><strong>DPRO 不用品回収・遺品整理</strong><small>営業前システムチェック</small></div></div>
+      <nav class="toplinks"><a href="owner.html?demo=1">管理画面</a><a href="staff.html?demo=1">スタッフ</a><a href="index.html?demo=1">お客様画面</a></nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="heroin">
+      <span class="eyebrow">営業前の内部確認用</span>
+      <h1>システム一括チェック</h1>
+      <p>API、データ、画面、電話番号、予定時間、写真管理などを安全に確認します。</p>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <section class="control">
+      <div class="control-grid">
+        <div class="field">
+          <label>管理コード</label>
+          <div class="code-row"><input id="adminCode" type="password" inputmode="numeric" autocomplete="one-time-code" placeholder="管理コードを入力"><button class="btn secondary" id="clearAdmin" type="button">削除</button></div>
+          <div class="help">管理APIの確認に使用します。デモURLでは「1234」を自動入力します。</div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="runBtn" type="button">全項目をチェック</button>
+          <button class="btn secondary" id="copyBtn" type="button">結果をコピー</button>
+          <button class="btn demo-btn" id="demoPrepareBtn" type="button">営業前DEMO準備</button>
+        </div>
+      </div>
+      <div class="notice">通常の一括チェックではデータを変更しません。「営業前DEMO準備」を押した場合だけ、デモデータを営業用の初期状態へ戻します。</div>
+    </section>
+
+    <section class="statusbar">
+      <div class="summary main"><small>総合判定</small><strong id="overall">未チェック</strong></div>
+      <div class="summary pass"><small>正常</small><strong id="passCount">0</strong></div>
+      <div class="summary warn"><small>注意</small><strong id="warnCount">0</strong></div>
+      <div class="summary fail"><small>異常</small><strong id="failCount">0</strong></div>
+      <div class="summary pending"><small>未確認</small><strong id="pendingCount">16</strong></div>
+    </section>
+
+    <section class="meta">
+      <div class="meta-head"><h2>接続情報</h2><span class="api-pill" id="apiPill">未接続</span></div>
+      <div class="meta-grid">
+        <div class="meta-item"><small>会社・事業所</small><strong id="metaCompany">―</strong></div>
+        <div class="meta-item"><small>Workerバージョン</small><strong id="metaVersion">―</strong></div>
+        <div class="meta-item"><small>DB件数</small><strong id="metaCounts">―</strong></div>
+        <div class="meta-item"><small>最終チェック</small><strong id="metaChecked">―</strong></div>
+      </div>
+    </section>
+
+    <div class="section-head"><h2>チェック項目</h2><span>緑＝正常／黄＝注意／赤＝要修正</span></div>
+    <section class="checks" id="checks"></section>
+
+    <div class="section-head"><h2>公開画面</h2><span>営業時に使用する画面を直接開けます</span></div>
+    <section class="links">
+      <a class="linkcard" href="index.html?demo=1" target="_blank"><strong>お客様向け相談受付</strong><small id="urlIndex"></small></a>
+      <a class="linkcard" href="member.html?demo=1" target="_blank"><strong>お客様マイページ</strong><small id="urlMember"></small></a>
+      <a class="linkcard" href="owner.html?demo=1" target="_blank"><strong>オーナーPC管理</strong><small id="urlOwner"></small></a>
+      <a class="linkcard" href="staff.html?demo=1" target="_blank"><strong>現場スタッフ</strong><small id="urlStaff"></small></a>
+    </section>
+
+    <section class="report">
+      <div class="report-head"><h2>チェック結果レポート</h2><button class="btn secondary" id="copyReportBtn" type="button">レポートをコピー</button></div>
+      <div class="report-body"><textarea id="reportText" readonly>まだチェックを実行していません。</textarea></div>
+    </section>
+  </main>
+
+  <footer>DPRO 不用品回収・遺品整理 LINE｜system-check.html</footer>
+  <div class="toast" id="toast"></div>
+  <div class="loading" id="loading"><div><div class="spinner"></div><strong id="loadingText">確認しています</strong><div id="loadingSub"></div></div></div>
+  <div class="demo-badge" id="demoBadge">DEMO</div>
+
+  <script>
+  (() => {
+    'use strict';
+    const $=id=>document.getElementById(id);
+    const CFG=window.DPRO_DISPOSAL_CONFIG||{};
+    const API=String(CFG.API_BASE||'https://dpro-disposal-line-api.dpromstk2000.workers.dev').replace(/\/$/,'');
+    const COMPANY=CFG.COMPANY_CODE||'dpro_disposal_demo';
+    const params=new URLSearchParams(location.search);
+    const IS_DEMO=params.get('demo')==='1'||COMPANY.includes('demo');
+    const ctx={health:null,config:null,dashboard:null,cases:[],day:null,caseDetail:null};
+    const results=new Map();
+
+    const definitions=[
+      {id:'health',title:'Worker API・DB接続',desc:'health APIとデータベース接続状態を確認します。',run:checkHealth},
+      {id:'publicConfig',title:'会社設定・公開設定',desc:'会社コード、事業所名、スタッフ設定を読み込みます。',run:checkPublicConfig},
+      {id:'adminAuth',title:'管理コード・ダッシュボード',desc:'管理コードで管理APIへ接続できるか確認します。',run:checkAdminDashboard},
+      {id:'cases',title:'案件一覧・関連データ',desc:'案件一覧と顧客・予定などの関連情報を確認します。',run:checkCases},
+      {id:'caseDetail',title:'案件詳細取得',desc:'実際の案件詳細を管理APIから読み込みます。',run:checkCaseDetail},
+      {id:'customers',title:'既存顧客検索',desc:'電話番号または氏名による既存顧客検索を確認します。',run:checkCustomerSearch},
+      {id:'day',title:'訪問・作業予定',desc:'本日または直近の訪問予定を読み込みます。',run:checkDay},
+      {id:'phone',title:'電話番号正規化',desc:'ハイフン、全角、空白、+81形式を同一番号として判定します。',run:checkPhoneNormalization},
+      {id:'slots',title:'30分単位の予定時間',desc:'予定時刻が30分単位で扱われることを確認します。',run:checkThirtyMinutes},
+      {id:'pastGuard',title:'過去日時防止',desc:'画面側の過去日時判定が正しく動くか確認します。',run:checkPastGuard},
+      {id:'privatePhotos',title:'写真の非公開管理',desc:'現場写真を社内限定で管理できる設定を確認します。',run:checkPrivatePhotos},
+      {id:'buyback',title:'買取相殺対応',desc:'買取候補・買取相殺機能が有効か確認します。',run:checkBuyback},
+      {id:'indexPage',title:'お客様向け相談受付画面',desc:'index.htmlが公開され、必要な画面要素があるか確認します。',run:()=>checkPage('index.html',['無料見積り','ご相談'])},
+      {id:'memberPage',title:'お客様マイページ',desc:'member.htmlが公開され、受付状況確認画面があるか確認します。',run:()=>checkPage('member.html',['受付状況','マイページ'])},
+      {id:'ownerPage',title:'オーナーPC管理画面',desc:'owner.htmlが公開され、管理画面があるか確認します。',run:()=>checkPage('owner.html',['オーナーPC管理','ダッシュボード'])},
+      {id:'staffPage',title:'現場スタッフ画面',desc:'staff.htmlが公開され、現場進行画面があるか確認します。',run:()=>checkPage('staff.html',['現場スタッフ','本日の現場'])}
+    ];
+
+    function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+    function normalizePhone(v){let s=String(v||'').normalize('NFKC').replace(/[ー－―‐ｰ]/g,'-').replace(/[^0-9+]/g,'');if(s.startsWith('+81'))s='0'+s.slice(3);if(s.startsWith('0081'))s='0'+s.slice(4);return s.replace(/\D/g,'')}
+    function localDate(d){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(d)}
+    function jstDateTime(){return new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'numeric',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(new Date())}
+    function tomorrow(){const d=new Date();d.setDate(d.getDate()+1);return localDate(d)}
+    function yesterday(){const d=new Date();d.setDate(d.getDate()-1);return localDate(d)}
+    function isPastLocal(value){if(!value)return false;return new Date(value+':00+09:00').getTime()<Date.now()}
+    function isHalfHour(value){if(!value)return false;const d=new Date(value);const m=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Tokyo',minute:'2-digit'}).format(d);return m==='00'||m==='30'}
+    function showLoading(on,a='確認しています',b=''){$('loading').classList.toggle('show',!!on);$('loadingText').textContent=a;$('loadingSub').textContent=b}
+    function toast(m,tone=''){const e=$('toast');e.textContent=m;e.className='toast show'+(tone?' '+tone:'');clearTimeout(toast.t);toast.t=setTimeout(()=>e.className='toast',3600)}
+    function adminCode(){return $('adminCode').value.trim()}
+    async function fetchWithTimeout(url,opt={},timeout=15000){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeout);try{return await fetch(url,{...opt,signal:controller.signal,cache:'no-store'})}finally{clearTimeout(timer)}}
+    async function request(path,{admin=false,method='GET',body=null,health=false}={}){
+      const url=health?new URL(API+'/api/health'):new URL(API+path);
+      if(!health)url.searchParams.set('company_code',COMPANY);
+      const headers={};if(admin){const code=adminCode();if(!code)throw new Error('管理コードが未入力です。');headers['x-admin-code']=code}
+      if(body!==null)headers['content-type']='application/json';
+      const res=await fetchWithTimeout(url,{method,headers,body:body===null?undefined:JSON.stringify(body)});
+      const text=await res.text();let data={};try{data=text?JSON.parse(text):{}}catch{throw new Error(`JSONを読み取れません (${res.status})`)}
+      if(!res.ok||data.ok===false)throw new Error(data?.error?.message||data?.message||`通信エラー (${res.status})`);
+      return data
+    }
+
+    function renderDefinitions(){
+      $('checks').innerHTML=definitions.map((d,i)=>`<article class="check pending" id="check-${esc(d.id)}"><div class="check-icon" id="icon-${esc(d.id)}">${i+1}</div><div><h3>${esc(d.title)}</h3><p>${esc(d.desc)}</p><div class="result" id="result-${esc(d.id)}">未確認</div></div></article>`).join('')
+    }
+    function setResult(id,status,message,detail=''){
+      results.set(id,{status,message,detail});
+      const card=$('check-'+id),icon=$('icon-'+id),result=$('result-'+id);
+      card.className='check '+status;icon.textContent=status==='pass'?'✓':status==='warn'?'!':status==='fail'?'×':'…';
+      result.className='result '+status;result.textContent=detail?`${message}\n${detail}`:message;
+      updateSummary()
+    }
+    function setRunning(id){const card=$('check-'+id),icon=$('icon-'+id),result=$('result-'+id);card.className='check running';icon.textContent='…';result.className='result';result.textContent='確認中…'}
+    function updateSummary(){
+      const vals=[...results.values()],pass=vals.filter(x=>x.status==='pass').length,warn=vals.filter(x=>x.status==='warn').length,fail=vals.filter(x=>x.status==='fail').length,pending=definitions.length-vals.length;
+      $('passCount').textContent=pass;$('warnCount').textContent=warn;$('failCount').textContent=fail;$('pendingCount').textContent=pending;
+      const overall=$('overall');
+      if(!vals.length)overall.textContent='未チェック';
+      else if(fail)overall.textContent='要修正';
+      else if(pending)overall.textContent='確認中';
+      else if(warn)overall.textContent='注意あり';
+      else overall.textContent='営業可能';
+      buildReport()
+    }
+    function buildReport(){
+      const lines=[
+        'DPRO 不用品回収・遺品整理 LINE｜営業前システムチェック',
+        `確認日時：${$('metaChecked').textContent}`,
+        `会社：${$('metaCompany').textContent}`,
+        `Worker：${$('metaVersion').textContent}`,
+        `総合判定：${$('overall').textContent}`,
+        ''
+      ];
+      definitions.forEach((d,i)=>{const r=results.get(d.id);lines.push(`${String(i+1).padStart(2,'0')}. ${d.title}：${r?({pass:'正常',warn:'注意',fail:'異常'}[r.status]||r.status):'未確認'}`);if(r?.message)lines.push(`    ${r.message}`);if(r?.detail)lines.push(`    ${r.detail}`)});
+      $('reportText').value=lines.join('\n')
+    }
+    function setApi(ok,text){$('apiPill').textContent=text;$('apiPill').className='api-pill '+(ok?'ok':'bad')}
+
+    async function checkHealth(){
+      ctx.health=await request('/api/health',{health:true});
+      const dbOk=ctx.health.database?.ok!==false;
+      if(!dbOk)throw new Error('データベース接続が正常ではありません。');
+      const company=ctx.health.company||ctx.health.database?.office||{};
+      $('metaCompany').textContent=company.company_name||company.office_name||company.shop_name||'DPRO 不用品回収・遺品整理';
+      $('metaVersion').textContent=ctx.health.version||'バージョン情報なし';
+      const counts=ctx.health.database?.counts||{};
+      $('metaCounts').textContent=Object.keys(counts).length?Object.entries(counts).map(([k,v])=>`${k}:${v}`).join(' / '):'件数情報なし';
+      setApi(true,'API・DB接続OK');
+      return {status:'pass',message:'Worker APIとデータベースへ接続できました。',detail:ctx.health.version||ctx.health.service||''}
+    }
+    async function checkPublicConfig(){
+      ctx.config=await request('/api/public/config');
+      const code=ctx.config.company_code||ctx.config.company?.company_code||ctx.config.office_code||ctx.config.shop_code||COMPANY;
+      if(code!==COMPANY)return {status:'warn',message:'設定は取得できましたが会社コードを確認してください。',detail:`取得:${code} / 想定:${COMPANY}`};
+      const staff=ctx.config.staff||[];
+      return {status:'pass',message:'公開設定を正常に取得しました。',detail:`会社コード:${code} / スタッフ:${staff.length}名`}
+    }
+    async function checkAdminDashboard(){
+      ctx.dashboard=await request('/api/admin/dashboard',{admin:true});
+      const counts=ctx.dashboard.counts||ctx.dashboard.dashboard?.counts||ctx.dashboard.summary||{};
+      return {status:'pass',message:'管理コード認証とダッシュボード取得に成功しました。',detail:Object.keys(counts).length?Object.entries(counts).slice(0,8).map(([k,v])=>`${k}:${v}`).join(' / '):'管理API応答OK'}
+    }
+    async function checkCases(){
+      const res=await request('/api/admin/cases?limit=200',{admin:true});ctx.cases=res.cases||[];
+      if(!Array.isArray(ctx.cases))throw new Error('案件一覧の形式が正しくありません。');
+      const linked=ctx.cases.filter(c=>c.disposal_customers).length;
+      return {status:ctx.cases.length?'pass':'warn',message:ctx.cases.length?'案件一覧を正常に取得しました。':'案件一覧は正常ですが、登録案件がありません。',detail:`案件:${ctx.cases.length}件 / 顧客紐付け:${linked}件`}
+    }
+    async function checkCaseDetail(){
+      if(!ctx.cases.length)return {status:'warn',message:'案件がないため詳細取得は省略しました。'};
+      const c=ctx.cases[0],res=await request('/api/admin/case?id='+encodeURIComponent(c.id),{admin:true});ctx.caseDetail=res.case;
+      if(!ctx.caseDetail?.id)throw new Error('案件詳細を取得できませんでした。');
+      return {status:'pass',message:'案件詳細と関連データを取得しました。',detail:`受付番号:${ctx.caseDetail.case_no||'―'} / 品目:${ctx.caseDetail.disposal_items?.length||0}件 / 予定:${ctx.caseDetail.disposal_appointments?.length||0}件`}
+    }
+    async function checkCustomerSearch(){
+      const c=ctx.cases.find(x=>x.disposal_customers?.phone)||ctx.cases.find(x=>x.disposal_customers?.customer_name);
+      if(!c)return {status:'warn',message:'検索に使用できる顧客情報がないため省略しました。'};
+      const q=normalizePhone(c.disposal_customers?.phone)||c.disposal_customers?.customer_name;
+      const res=await request('/api/admin/customers/search?q='+encodeURIComponent(q),{admin:true});
+      const rows=res.customers||[];
+      if(!rows.length)return {status:'warn',message:'検索APIは応答しましたが一致する顧客がありません。',detail:`検索値:${q}`};
+      return {status:'pass',message:'既存顧客検索が正常です。',detail:`検索値:${q} / 結果:${rows.length}件`}
+    }
+    async function checkDay(){
+      const candidate=(ctx.cases.flatMap(c=>c.disposal_appointments||[]).find(a=>a.start_at)?.start_at||'').slice(0,10)||localDate(new Date());
+      ctx.day=await request('/api/admin/day?date='+encodeURIComponent(candidate),{admin:true});
+      const rows=ctx.day.appointments||[];
+      return {status:'pass',message:'訪問・作業予定を正常に取得しました。',detail:`対象日:${candidate} / 予定:${rows.length}件 / スタッフ:${ctx.day.staff?.length||0}名`}
+    }
+    async function checkPhoneNormalization(){
+      const values=['090-1111-3201','09011113201','０９０－１１１１－３２０１','090 1111 3201','+81 90-1111-3201'];
+      const normalized=values.map(normalizePhone);
+      if(!normalized.every(x=>x==='09011113201'))throw new Error('電話番号の正規化結果が一致しません。');
+      return {status:'pass',message:'ハイフン・全角・空白・+81形式を同一番号として判定しました。',detail:'結果:09011113201'}
+    }
+    async function checkThirtyMinutes(){
+      const rows=[...(ctx.day?.appointments||[]),...ctx.cases.flatMap(c=>c.disposal_appointments||[])];
+      const unique=[...new Map(rows.filter(x=>x.id).map(x=>[x.id,x])).values()];
+      const invalid=unique.filter(a=>(a.start_at&&!isHalfHour(a.start_at))||(a.end_at&&!isHalfHour(a.end_at)));
+      if(invalid.length)throw new Error(`${invalid.length}件の予定が30分単位ではありません。`);
+      const test=['2026-07-18T09:00:00+09:00','2026-07-18T09:30:00+09:00'].every(isHalfHour);
+      if(!test)throw new Error('30分単位の判定テストに失敗しました。');
+      return {status:'pass',message:'予定時刻は30分単位です。',detail:unique.length?`確認予定:${unique.length}件`:'登録予定なし／単体判定OK'}
+    }
+    async function checkPastGuard(){
+      const past=`${yesterday()}T12:00`,future=`${tomorrow()}T12:00`;
+      if(!isPastLocal(past)||isPastLocal(future))throw new Error('過去日時判定が正しくありません。');
+      return {status:'pass',message:'過去日時を拒否し、未来日時を許可する判定が正常です。',detail:`過去:${past}→拒否 / 未来:${future}→許可`}
+    }
+    async function checkPrivatePhotos(){
+      const f=ctx.health?.features||ctx.config?.features||{};
+      const enabled=f.private_photo_storage===true||f.photo_upload===true||f.photo_estimate===true;
+      if(!enabled)return {status:'warn',message:'APIは正常ですが写真機能フラグを確認できませんでした。'};
+      return {status:'pass',message:'写真アップロード・非公開管理機能が有効です。',detail:`private_photo_storage:${String(f.private_photo_storage)} / photo_upload:${String(f.photo_upload)}`}
+    }
+    async function checkBuyback(){
+      const f=ctx.health?.features||ctx.config?.features||{};
+      const caseBuyback=ctx.cases.some(c=>(c.disposal_items||[]).some(i=>i.buyback_candidate)||(c.disposal_estimates||[]).some(e=>Number(e.buyback_offset_amount)>0));
+      const enabled=f.buyback_offset===true||caseBuyback;
+      if(!enabled)return {status:'warn',message:'APIは正常ですが買取相殺の確認用データがありません。'};
+      return {status:'pass',message:'買取候補・買取相殺に対応しています。',detail:`機能フラグ:${String(f.buyback_offset)} / 確認データ:${caseBuyback?'あり':'なし'}`}
+    }
+    async function checkPage(file,keywords){
+      const url=new URL(file,location.href);url.searchParams.set('_check',Date.now());
+      const res=await fetchWithTimeout(url,{},12000);if(!res.ok)throw new Error(`${file} HTTP ${res.status}`);
+      const text=await res.text();const found=keywords.some(k=>text.includes(k));
+      if(!found)return {status:'warn',message:`${file}は公開されていますが、想定文字を確認できませんでした。`};
+      return {status:'pass',message:`${file}を正常に取得しました。`,detail:`HTTP ${res.status} / ${Math.round(text.length/1024)}KB`}
+    }
+
+    async function runAll(){
+      if(!adminCode())return toast('管理コードを入力してください。','error');
+      results.clear();ctx.health=null;ctx.config=null;ctx.dashboard=null;ctx.cases=[];ctx.day=null;ctx.caseDetail=null;
+      renderDefinitions();updateSummary();$('metaChecked').textContent='確認中';$('metaCompany').textContent='―';$('metaVersion').textContent='―';$('metaCounts').textContent='―';setApi(false,'接続確認中');
+      $('runBtn').disabled=true;$('demoPrepareBtn').disabled=true;
+      for(let i=0;i<definitions.length;i++){
+        const d=definitions[i];setRunning(d.id);showLoading(true,'システムを確認しています',`${i+1} / ${definitions.length}　${d.title}`);
+        try{
+          const r=await d.run();setResult(d.id,r?.status||'pass',r?.message||'正常です。',r?.detail||'')
+        }catch(e){setResult(d.id,'fail',e.name==='AbortError'?'通信がタイムアウトしました。':e.message)}
+      }
+      $('metaChecked').textContent=jstDateTime();updateSummary();showLoading(false);$('runBtn').disabled=false;$('demoPrepareBtn').disabled=false;
+      if($('failCount').textContent==='0')toast($('warnCount').textContent==='0'?'全項目正常です。営業可能です。':'チェック完了。注意項目を確認してください。');
+      else toast('異常項目があります。赤い項目を確認してください。','error')
+    }
+
+    async function demoPrepare(){
+      if(!adminCode())return toast('管理コードを入力してください。','error');
+      if(!IS_DEMO&&!confirm('デモ環境ではない可能性があります。本当にDEMO準備を実行しますか？'))return;
+      if(!confirm('営業用デモデータを初期状態へ戻します。よろしいですか？'))return;
+      $('demoPrepareBtn').disabled=true;showLoading(true,'営業用デモデータを準備しています','完了後に一括チェックを実行します。');
+      try{
+        await request('/api/admin/demo-prepare',{admin:true,method:'POST',body:{}});
+        toast('営業用デモデータを準備しました。');await runAll()
+      }catch(e){showLoading(false);toast(e.message,'error')}finally{$('demoPrepareBtn').disabled=false}
+    }
+
+    async function copyReport(){
+      try{await navigator.clipboard.writeText($('reportText').value);toast('チェック結果をコピーしました。')}
+      catch{ $('reportText').focus();$('reportText').select();document.execCommand('copy');toast('チェック結果をコピーしました。')}
+    }
+    function initUrls(){
+      ['Index','Member','Owner','Staff'].forEach(n=>{const f=n.toLowerCase()==='index'?'index.html':n.toLowerCase()+'.html';$( 'url'+n ).textContent=new URL(f+'?demo=1',location.href).toString()})
+    }
+    function init(){
+      renderDefinitions();updateSummary();initUrls();
+      if(IS_DEMO){$('adminCode').value='1234';$('demoBadge').classList.add('show')}
+      $('runBtn').onclick=runAll;$('demoPrepareBtn').onclick=demoPrepare;$('copyBtn').onclick=copyReport;$('copyReportBtn').onclick=copyReport;
+      $('clearAdmin').onclick=()=>{$('adminCode').value='';$('adminCode').focus()};
+      $('adminCode').addEventListener('keydown',e=>{if(e.key==='Enter')runAll()})
+    }
+    init()
+  })();
+  </script>
+</body>
+</html>
