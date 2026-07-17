@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#174f4a">
+  <meta name="description" content="DPRO 不用品回収・遺品整理 LINE 最終総合テスト">
+  <title>DPRO 不用品回収・遺品整理｜最終総合テスト</title>
+  <script src="config.js"></script>
+  <style>
+    :root{
+      --deep:#123f3b;--main:#286d65;--main2:#43867d;--pale:#e8f3f0;--cream:#fbf8f0;
+      --ink:#172d2a;--muted:#5d716e;--line:#d5e2df;--white:#fff;--danger:#a13c35;
+      --dangerbg:#fff0ee;--warn:#96600c;--warnbg:#fff5df;--ok:#17705f;--okbg:#e9f7f1;
+      --info:#286795;--infobg:#edf5fc;--shadow:0 14px 42px rgba(18,63,59,.13)
+    }
+    *{box-sizing:border-box}
+    html{font-size:16px;scroll-behavior:smooth}
+    body{margin:0;background:#f2f7f5;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif;line-height:1.65}
+    button,input,textarea{font:inherit}button{cursor:pointer}a{color:var(--main)}
+    .top{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.97);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+    .topin{max-width:1180px;margin:auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}.mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--deep),var(--main2));color:#fff;display:grid;place-items:center;font-weight:900;font-size:19px}
+    .brand strong{display:block;font-size:16px;line-height:1.3}.brand small{display:block;color:var(--muted);font-size:12px}
+    .toplinks{display:flex;gap:8px}.toplinks a{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;min-height:41px;padding:8px 12px;border-radius:11px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:900}
+    .hero{background:linear-gradient(132deg,var(--deep),#286d65 72%,#4b8072);color:#fff}.heroin{max-width:1180px;margin:auto;padding:34px 20px 58px}
+    .eyebrow{display:inline-flex;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.12);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:900}
+    .hero h1{font-size:clamp(29px,5vw,44px);line-height:1.25;margin:12px 0 6px}.hero p{margin:0;color:#dceee9;font-size:17px}
+    .wrap{max-width:1180px;margin:-33px auto 56px;padding:0 15px;position:relative}
+    .control{background:#fff;border:1px solid var(--line);border-radius:21px;box-shadow:var(--shadow);padding:18px;margin-bottom:15px}
+    .control-grid{display:grid;grid-template-columns:minmax(250px,1fr) auto;gap:14px;align-items:end}
+    .field label{display:block;font-weight:900;margin-bottom:5px}.code-row{display:grid;grid-template-columns:1fr auto;gap:8px}
+    input,textarea{width:100%;border:2px solid var(--line);border-radius:12px;padding:11px 13px;outline:none;background:#fff;color:var(--ink)}
+    input{min-height:51px}textarea{min-height:180px;resize:vertical;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
+    input:focus,textarea:focus{border-color:var(--main);box-shadow:0 0 0 4px rgba(40,109,101,.12)}
+    .help{font-size:13px;color:var(--muted);margin-top:5px}.actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{border:0;border-radius:13px;min-height:51px;padding:11px 17px;font-weight:900}.primary{background:linear-gradient(135deg,var(--deep),var(--main));color:#fff;box-shadow:0 7px 18px rgba(18,63,59,.18)}
+    .secondary{background:#edf4f2;color:var(--ink);border:1px solid #d3e2df}.reset{background:var(--warnbg);color:#82510b;border:1px solid #e7ca91}.btn:disabled{opacity:.55;cursor:not-allowed}
+    .notice{margin-top:13px;background:var(--cream);border:1px solid #eadbbd;border-radius:14px;padding:12px 14px;color:#6c5230}
+    .summary-grid{display:grid;grid-template-columns:1.2fr repeat(4,.7fr);gap:10px;margin-bottom:15px}
+    .summary{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px 15px}.summary small{display:block;color:var(--muted);font-weight:800}.summary strong{display:block;font-size:27px;line-height:1.25;margin-top:3px}
+    .summary.main strong{font-size:19px}.summary.pass strong{color:var(--ok)}.summary.fail strong{color:var(--danger)}.summary.run strong{color:var(--info)}
+    .test-info{display:none;background:#fff;border:1px solid var(--line);border-radius:18px;margin-bottom:15px;overflow:hidden}.test-info.show{display:block}
+    .test-info-head{padding:14px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}.test-info-head h2{font-size:20px;margin:0}
+    .test-grid{display:grid;grid-template-columns:repeat(4,1fr)}.test-item{padding:14px 16px;border-right:1px solid var(--line)}.test-item:last-child{border-right:0}.test-item small{display:block;color:var(--muted)}.test-item strong{display:block;word-break:break-word}
+    .open-links{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 16px}.open-links a{display:inline-flex;text-decoration:none;border:1px solid var(--line);border-radius:11px;padding:8px 11px;background:#fff;color:var(--ink);font-weight:900}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:21px 2px 10px}.section-head h2{font-size:23px;margin:0}.section-head span{font-size:13px;color:var(--muted)}
+    .steps{display:grid;grid-template-columns:1fr 1fr;gap:11px}.step{background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px;display:grid;grid-template-columns:42px 1fr;gap:12px;min-height:122px}
+    .icon{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#eef3f2;color:var(--muted);font-weight:900;font-size:18px}.step.running .icon{background:var(--infobg);color:var(--info);animation:pulse 1s infinite}.step.pass{border-color:#b9ded3}.step.pass .icon{background:var(--okbg);color:var(--ok)}.step.fail{border-color:#ecc4c0}.step.fail .icon{background:var(--dangerbg);color:var(--danger)}
+    @keyframes pulse{50%{opacity:.4}}.step h3{font-size:17px;margin:0 0 3px}.step p{margin:0;color:var(--muted);font-size:13px}.result{margin-top:8px;padding-top:8px;border-top:1px solid #edf1f0;font-size:13px;font-weight:800;white-space:pre-wrap;word-break:break-word}.result.pass{color:var(--ok)}.result.fail{color:var(--danger)}
+    .report{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:16px}.report-head{padding:14px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}.report-head h2{font-size:20px;margin:0}.report-body{padding:15px 17px}
+    .toast{position:fixed;left:50%;bottom:18px;z-index:100;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#173e3a;color:#fff;border-radius:13px;padding:12px 16px;box-shadow:0 12px 35px rgba(0,0,0,.25);font-weight:900;transition:.2s;max-width:min(92vw,700px)}.toast.show{opacity:1;transform:translate(-50%,0)}.toast.error{background:#8b332d}
+    .loading{position:fixed;inset:0;z-index:90;background:rgba(11,39,36,.72);display:none;place-items:center;color:#fff;text-align:center;padding:20px}.loading.show{display:grid}.spinner{width:50px;height:50px;border:5px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 13px}@keyframes spin{to{transform:rotate(360deg)}}
+    .demo{position:fixed;right:11px;bottom:11px;z-index:45;background:#825619;color:#fff;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:900}
+    footer{text-align:center;color:var(--muted);font-size:13px;padding:18px}
+    @media(max-width:850px){.control-grid{grid-template-columns:1fr}.actions{justify-content:stretch}.actions .btn{flex:1}.summary-grid{grid-template-columns:1fr 1fr}.summary.main{grid-column:1/-1}.test-grid{grid-template-columns:1fr 1fr}.test-item:nth-child(2){border-right:0}.test-item:nth-child(-n+2){border-bottom:1px solid var(--line)}.steps{grid-template-columns:1fr}}
+    @media(max-width:560px){.topin{padding:8px 10px}.brand small{display:none}.brand strong{font-size:14px}.mark{width:40px;height:40px}.toplinks a:not(:first-child){display:none}.heroin{padding:27px 14px 49px}.hero h1{font-size:29px}.hero p{font-size:15px}.wrap{padding:0 9px}.control{padding:14px}.actions{display:grid;grid-template-columns:1fr 1fr}.actions .primary{grid-column:1/-1}.summary{padding:11px 12px}.test-grid{grid-template-columns:1fr}.test-item{border-right:0;border-bottom:1px solid var(--line)!important}.test-item:last-child{border-bottom:0!important}.step{grid-template-columns:37px 1fr;padding:13px}.icon{width:37px;height:37px}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="topin"><div class="brand"><div class="mark">D</div><div><strong>DPRO 不用品回収・遺品整理</strong><small>STEP DISPOSAL-8 最終総合テスト</small></div></div><nav class="toplinks"><a href="system-check.html?demo=1">system-check</a><a href="owner.html?demo=1">管理画面</a><a href="staff.html?demo=1">スタッフ</a></nav></div></header>
+  <section class="hero"><div class="heroin"><span class="eyebrow">デモ環境専用・実保存テスト</span><h1>受付から精算まで自動で一巡</h1><p>お客様受付、予定、見積り、写真、現場進行、報告、精算、マイページ反映を実際のAPIで確認します。</p></div></section>
+
+  <main class="wrap">
+    <section class="control">
+      <div class="control-grid">
+        <div class="field"><label>管理コード</label><div class="code-row"><input id="adminCode" type="password" inputmode="numeric" value="1234"><button class="btn secondary" id="clearAdmin" type="button">削除</button></div><div class="help">このテストは company_code に「demo」を含む環境だけで実行できます。</div></div>
+        <div class="actions"><button class="btn primary" id="runBtn" type="button">最終総合テスト開始</button><button class="btn secondary" id="copyBtn" type="button">結果をコピー</button><button class="btn reset" id="resetBtn" type="button">DEMO状態へ戻す</button></div>
+      </div>
+      <div class="notice">開始時に営業用デモデータを初期化した後、専用のテスト案件を1件作成します。テスト完了後は「DEMO状態へ戻す」を押すと、通常の営業デモ状態へ戻ります。</div>
+    </section>
+
+    <section class="summary-grid">
+      <div class="summary main"><small>総合判定</small><strong id="overall">未実行</strong></div>
+      <div class="summary pass"><small>正常</small><strong id="passCount">0</strong></div>
+      <div class="summary fail"><small>異常</small><strong id="failCount">0</strong></div>
+      <div class="summary run"><small>進行中</small><strong id="runningCount">0</strong></div>
+      <div class="summary"><small>未確認</small><strong id="pendingCount">14</strong></div>
+    </section>
+
+    <section class="test-info" id="testInfo">
+      <div class="test-info-head"><h2>作成した総合テスト案件</h2><span id="testStatus">―</span></div>
+      <div class="test-grid"><div class="test-item"><small>受付番号</small><strong id="caseNo">―</strong></div><div class="test-item"><small>お客様</small><strong id="customerName">―</strong></div><div class="test-item"><small>電話番号</small><strong id="customerPhone">―</strong></div><div class="test-item"><small>最終状態</small><strong id="finalStatus">―</strong></div></div>
+      <div class="open-links"><a id="memberLink" target="_blank" rel="noopener">お客様マイページを開く</a><a id="ownerLink" href="owner.html?demo=1" target="_blank" rel="noopener">オーナー画面を開く</a><a id="staffLink" href="staff.html?demo=1" target="_blank" rel="noopener">スタッフ画面を開く</a></div>
+    </section>
+
+    <div class="section-head"><h2>総合テスト項目</h2><span>実際のWorker API・Supabase保存を使用します</span></div>
+    <section class="steps" id="steps"></section>
+
+    <section class="report"><div class="report-head"><h2>総合テストレポート</h2><button class="btn secondary" id="copyReportBtn" type="button">レポートをコピー</button></div><div class="report-body"><textarea id="reportText" readonly>まだ総合テストを実行していません。</textarea></div></section>
+  </main>
+
+  <footer>DPRO 不用品回収・遺品整理 LINE｜final-test.html｜DISPOSAL-8</footer>
+  <div class="toast" id="toast"></div><div class="loading" id="loading"><div><div class="spinner"></div><strong id="loadingText">総合テストを実行しています</strong><div id="loadingSub"></div></div></div><div class="demo">DEMO TEST</div>
+
+  <script>
+  (() => {
+    'use strict';
+    const $=id=>document.getElementById(id);
+    const CFG=window.DPRO_DISPOSAL_CONFIG||{};
+    const API=String(CFG.API_BASE||'https://dpro-disposal-line-api.dpromstk2000.workers.dev').replace(/\/$/,'');
+    const COMPANY=CFG.COMPANY_CODE||'dpro_disposal_demo';
+    const results=new Map();
+    const state={receipt:null,case:null,staff:null,visit:null,work:null,total:72000,phone:'',startedAt:null};
+
+    const defs=[
+      {id:'reset',title:'営業用DEMO初期化',desc:'テスト開始前にデモデータを標準状態へ戻します。',run:prepareDemo},
+      {id:'health',title:'API・DB・公開設定',desc:'Worker、DB、会社設定、スタッフを確認します。',run:checkCore},
+      {id:'intake',title:'お客様相談受付',desc:'公開受付APIから専用テスト案件を新規作成します。',run:createIntake},
+      {id:'adminCase',title:'オーナー案件反映',desc:'管理APIで新規受付が確認できることを検証します。',run:findAdminCase},
+      {id:'visit',title:'現地見積り予定・完了',desc:'30分単位の訪問予定を保存し、現場完了まで更新します。',run:saveVisit},
+      {id:'estimate',title:'見積り・買取相殺',desc:'作業費、処分費、買取相殺を含む正式見積りを保存します。',run:saveEstimate},
+      {id:'work',title:'回収作業予定',desc:'現場スタッフ用の作業予定を登録します。',run:saveWork},
+      {id:'photo',title:'現場写真の非公開Storage保存',desc:'テスト画像を生成し、お客様公開写真として保存します。',run:savePhoto},
+      {id:'staff',title:'到着・作業開始・完了',desc:'スタッフ画面と同じAPIで現場進行を更新します。',run:runStaffFlow},
+      {id:'report',title:'お客様向け作業報告',desc:'お客様マイページへ公開する完了報告を保存します。',run:saveReport},
+      {id:'payment',title:'精算・入金完了',desc:'請求額と入金額を保存し、案件を精算完了にします。',run:savePayment},
+      {id:'member',title:'お客様マイページ反映',desc:'受付トークンで公開案件を取得し、予定・見積り・報告を確認します。',run:checkMember},
+      {id:'finalAdmin',title:'最終管理データ確認',desc:'写真・精算・状態を管理APIで再取得して確認します。',run:checkFinalAdmin},
+      {id:'pages',title:'4画面の公開確認',desc:'受付、マイページ、オーナー、スタッフ画面をHTTP取得します。',run:checkPages}
+    ];
+
+    function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+    function localDate(d){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(d)}
+    function addDays(days){const d=new Date(Date.now()+days*86400000);return localDate(d)}
+    function iso(day,hour,minute=0){return new Date(`${addDays(day)}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:00+09:00`).toISOString()}
+    function adminCode(){return $('adminCode').value.trim()}
+    function showLoading(on,a='総合テストを実行しています',b=''){$('loading').classList.toggle('show',on);$('loadingText').textContent=a;$('loadingSub').textContent=b}
+    function toast(m,tone=''){const e=$('toast');e.textContent=m;e.className='toast show'+(tone?' '+tone:'');clearTimeout(toast.t);toast.t=setTimeout(()=>e.className='toast',4000)}
+    async function fetchTimeout(url,opt={},ms=20000){const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);try{return await fetch(url,{...opt,signal:c.signal,cache:'no-store'})}finally{clearTimeout(t)}}
+    async function api(path,{admin=false,method='GET',body=null,form=null,health=false}={}){
+      const url=health?new URL(API+'/api/health'):new URL(API+path);if(!health)url.searchParams.set('company_code',COMPANY);
+      const headers={accept:'application/json'};if(admin){if(!adminCode())throw new Error('管理コードが未入力です。');headers['x-admin-code']=adminCode()}
+      let requestBody;if(form)requestBody=form;else if(body!==null){headers['content-type']='application/json';requestBody=JSON.stringify(body)}
+      const r=await fetchTimeout(url,{method,headers,body:requestBody});const text=await r.text();let d={};try{d=text?JSON.parse(text):{}}catch{throw new Error(`JSON解析エラー HTTP ${r.status}`)}
+      if(!r.ok||d.ok===false)throw new Error(d?.error?.message||d?.message||`通信エラー HTTP ${r.status}`);return d
+    }
+    async function publicPage(file){const u=new URL(file,location.href);u.searchParams.set('_test',Date.now());const r=await fetchTimeout(u,{},15000);if(!r.ok)throw new Error(`${file} HTTP ${r.status}`);return {status:r.status,length:(await r.text()).length}}
+    function renderDefs(){$('steps').innerHTML=defs.map((d,i)=>`<article class="step pending" id="step-${esc(d.id)}"><div class="icon" id="icon-${esc(d.id)}">${i+1}</div><div><h3>${esc(d.title)}</h3><p>${esc(d.desc)}</p><div class="result" id="result-${esc(d.id)}">未確認</div></div></article>`).join('')}
+    function running(id){const c=$('step-'+id);c.className='step running';$('icon-'+id).textContent='…';$('result-'+id).className='result';$('result-'+id).textContent='実行中…';updateSummary()}
+    function result(id,status,message,detail=''){results.set(id,{status,message,detail});const c=$('step-'+id);c.className='step '+status;$('icon-'+id).textContent=status==='pass'?'✓':'×';$('result-'+id).className='result '+status;$('result-'+id).textContent=detail?message+'\n'+detail:message;updateSummary()}
+    function updateSummary(){const vals=[...results.values()],pass=vals.filter(x=>x.status==='pass').length,fail=vals.filter(x=>x.status==='fail').length,runningNow=document.querySelectorAll('.step.running').length,pending=defs.length-pass-fail-runningNow;$('passCount').textContent=pass;$('failCount').textContent=fail;$('runningCount').textContent=runningNow;$('pendingCount').textContent=Math.max(0,pending);$('overall').textContent=fail?'要修正':runningNow?'実行中':pass===defs.length?'システム完成':'未実行';buildReport()}
+    function buildReport(){const lines=['DPRO 不用品回収・遺品整理 LINE｜STEP DISPOSAL-8 最終総合テスト',`実行日時：${state.startedAt||'未実行'}`,`会社コード：${COMPANY}`,`総合判定：${$('overall').textContent}`,`受付番号：${state.receipt?.case_no||'―'}`,''];defs.forEach((d,i)=>{const r=results.get(d.id);lines.push(`${String(i+1).padStart(2,'0')}. ${d.title}：${r?(r.status==='pass'?'正常':'異常'):'未確認'}`);if(r?.message)lines.push('    '+r.message);if(r?.detail)lines.push('    '+r.detail)});$('reportText').value=lines.join('\n')}
+    function showCaseInfo(){if(!state.receipt||!state.case)return;$('testInfo').classList.add('show');$('caseNo').textContent=state.receipt.case_no;$('customerName').textContent=state.case.disposal_customers?.customer_name||'DPRO 最終テスト';$('customerPhone').textContent=state.phone;$('finalStatus').textContent=state.case.status||'―';$('testStatus').textContent='実保存テスト案件';const u=new URL('member.html',location.href);u.searchParams.set('case_no',state.receipt.case_no);u.searchParams.set('token',state.receipt.public_token);$('memberLink').href=u.toString();$('staffLink').href='staff.html?demo=1&date='+addDays(2)}
+    async function refreshCase(){const r=await api('/api/admin/case?id='+encodeURIComponent(state.case.id),{admin:true});state.case=r.case;showCaseInfo();return r.case}
+    function latestAppointment(type){return [...(state.case.disposal_appointments||[])].filter(x=>x.appointment_type===type).sort((a,b)=>String(b.created_at||b.start_at).localeCompare(String(a.created_at||a.start_at)))[0]}
+
+    async function prepareDemo(){await api('/api/admin/demo-prepare',{admin:true,method:'POST',body:{}});return {message:'営業用デモデータを標準状態へ戻しました。'}}
+    async function checkCore(){const [h,c]=await Promise.all([api('/api/health',{health:true}),api('/api/public/config')]);const staff=c.staff||[];if(h.database?.ok===false)throw new Error('DB接続が正常ではありません。');if(!staff.length)throw new Error('スタッフが登録されていません。');state.staff=staff[0];return {message:'Worker、DB、公開設定を確認しました。',detail:`${h.version||h.service||''} / スタッフ:${staff.length}名`}}
+    async function createIntake(){
+      state.phone='080'+String(Date.now()).slice(-8);
+      const body={service_type:'junk_removal',title:'STEP DISPOSAL-8 最終総合テスト',intake_channel:'line',customer:{customer_name:'DPRO 最終テスト',phone:state.phone,preferred_contact_method:'phone'},work_city:'糟屋郡志免町',work_address1:'総合テスト1-2-3',property_type:'apartment',volume_level:'small',customer_note:'自動総合テスト案件です。テスト終了後にDEMO状態へ戻します。',preferred_date1:addDays(1),preferred_time1:'10:00',items:[{category:'appliance',item_name:'テスト用家電',quantity:1,unit:'点',buyback_candidate:true}]};
+      const d=await api('/api/public/cases',{method:'POST',body});state.receipt=d.receipt;if(!state.receipt?.case_no||!state.receipt?.public_token)throw new Error('受付番号または公開トークンが返されませんでした。');return {message:'公開受付APIから案件を作成しました。',detail:`受付番号:${state.receipt.case_no} / 電話:${state.phone}`}
+    }
+    async function findAdminCase(){const r=await api('/api/admin/cases?limit=200',{admin:true});state.case=(r.cases||[]).find(x=>x.case_no===state.receipt.case_no);if(!state.case)throw new Error('管理案件一覧に新規受付が反映されていません。');await refreshCase();return {message:'オーナー管理側に新規案件が反映されました。',detail:`case_id:${state.case.id}`}}
+    async function saveAppointment(type,day,startH,endH){
+      await api('/api/admin/appointments/save',{admin:true,method:'POST',body:{case_id:state.case.id,appointment_type:type,status:'scheduled',start_at:iso(day,startH),end_at:iso(day,endH),assigned_staff_id:state.staff?.id||null,vehicle_note:type==='work'?'2t車・2名班':'軽バン',customer_note:'到着前に電話します。',internal_note:'STEP DISPOSAL-8 自動総合テスト'}});
+      await refreshCase();const a=latestAppointment(type);if(!a?.id)throw new Error(`${type}の予定IDを取得できません。`);return a
+    }
+    async function updateAppointment(a,status){
+      await api('/api/admin/appointments/save',{admin:true,method:'POST',body:{id:a.id,case_id:state.case.id,appointment_type:a.appointment_type,status,start_at:a.start_at,end_at:a.end_at,assigned_staff_id:a.assigned_staff_id||a.disposal_staff?.id||state.staff?.id||null,vehicle_note:a.vehicle_note||'',customer_note:a.customer_note||'',internal_note:a.internal_note||''}})
+    }
+    async function setCaseStatus(status,next_action){
+      await api('/api/admin/cases/status',{admin:true,method:'POST',body:{case_id:state.case.id,status,assigned_staff_id:state.staff?.id||null,next_action,next_action_at:null,internal_note:'STEP DISPOSAL-8 自動総合テスト'}})
+    }
+    async function saveVisit(){state.visit=await saveAppointment('visit_estimate',1,10,11);await setCaseStatus('visit_scheduled','現地見積り');await updateAppointment(state.visit,'arrived');await updateAppointment(state.visit,'in_progress');await updateAppointment(state.visit,'completed');await setCaseStatus('visit_completed','見積り作成');await refreshCase();const a=latestAppointment('visit_estimate');if(a.status!=='completed')throw new Error('現地見積り予定が完了になっていません。');return {message:'現地見積り予定を登録し、到着から完了まで更新しました。',detail:`${a.start_at} / status:${a.status}`}}
+    async function saveEstimate(){
+      const lines=[{line_type:'labor',item_name:'回収作業費',quantity:1,unit:'式',unit_price:50000,amount:50000,customer_visible:true},{line_type:'disposal',item_name:'処分費',quantity:1,unit:'式',unit_price:20000,amount:20000,customer_visible:true},{line_type:'buyback',item_name:'テスト家電 買取相殺',quantity:1,unit:'式',unit_price:5000,amount:5000,customer_visible:true}];
+      await api('/api/admin/estimates/save',{admin:true,method:'POST',body:{case_id:state.case.id,estimate_type:'formal',status:'sent',valid_until:addDays(14),tax_amount:7000,customer_note:'買取相殺5,000円を差し引いた総合テスト見積りです。',internal_note:'STEP DISPOSAL-8',lines}});
+      await setCaseStatus('estimate_sent','見積り内容の確認');await refreshCase();const e=[...(state.case.disposal_estimates||[])].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))[0];if(!e||Number(e.buyback_offset_amount)!==5000||Number(e.total_amount)!==state.total)throw new Error(`見積り計算が一致しません。total:${e?.total_amount} buyback:${e?.buyback_offset_amount}`);return {message:'正式見積りと買取相殺を保存しました。',detail:`合計:${e.total_amount}円 / 買取相殺:${e.buyback_offset_amount}円`}}
+    async function saveWork(){state.work=await saveAppointment('work',2,9,11);await setCaseStatus('work_scheduled','回収作業');return {message:'回収作業予定を登録しました。',detail:`${state.work.start_at}〜${state.work.end_at}`}}
+    async function makeImage(){
+      const canvas=document.createElement('canvas');canvas.width=900;canvas.height=600;const x=canvas.getContext('2d');x.fillStyle='#e8f3f0';x.fillRect(0,0,900,600);x.fillStyle='#123f3b';x.font='bold 50px sans-serif';x.fillText('DPRO DISPOSAL',80,180);x.font='bold 34px sans-serif';x.fillText('STEP DISPOSAL-8 TEST PHOTO',80,250);x.font='24px sans-serif';x.fillText(new Date().toISOString(),80,320);return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('テスト画像生成に失敗しました。')),'image/png'))
+    }
+    async function savePhoto(){const blob=await makeImage(),fd=new FormData();fd.append('case_id',state.case.id);fd.append('file',blob,'disposal-step8-test.png');fd.append('photo_type','work_after');fd.append('caption','STEP DISPOSAL-8 作業後テスト写真');fd.append('visibility','customer_public');await api('/api/admin/photos/upload',{admin:true,method:'POST',form:fd});await refreshCase();const p=(state.case.disposal_photos||[]).find(x=>x.caption?.includes('DISPOSAL-8'));if(!p)throw new Error('保存した写真を案件詳細で確認できません。');return {message:'生成した現場写真を非公開Storageへ保存しました。',detail:`visibility:${p.visibility}`}}
+    async function runStaffFlow(){await refreshCase();state.work=latestAppointment('work');await updateAppointment(state.work,'arrived');await updateAppointment(state.work,'in_progress');await setCaseStatus('in_progress','作業中');await updateAppointment(state.work,'completed');await setCaseStatus('completion_check','作業完了確認');await refreshCase();const a=latestAppointment('work');if(a.status!=='completed'||state.case.status!=='completion_check')throw new Error(`現場進行結果が不一致です。appointment:${a.status} case:${state.case.status}`);return {message:'到着、作業開始、完了登録が正常に保存されました。',detail:`appointment:${a.status} / case:${state.case.status}`}}
+    async function saveReport(){await api('/api/admin/progress/save',{admin:true,method:'POST',body:{case_id:state.case.id,status:'completion_check',title:'STEP DISPOSAL-8 作業完了',customer_comment:'予定していた回収作業が完了しました。総合テストの公開報告です。',internal_comment:'自動総合テスト',visibility:'customer_public'}});await refreshCase();const r=(state.case.disposal_progress_reports||[]).find(x=>x.title==='STEP DISPOSAL-8 作業完了');if(!r||r.visibility!=='customer_public')throw new Error('お客様公開報告を確認できません。');return {message:'お客様向け作業完了報告を保存しました。',detail:r.title}}
+    async function savePayment(){await api('/api/admin/payments/save',{admin:true,method:'POST',body:{case_id:state.case.id,payment_status:'paid',payment_method:'cash',billed_amount:state.total,paid_amount:state.total,receipt_note:'STEP DISPOSAL-8 総合テスト精算'}});await setCaseStatus('payment_completed','精算完了');await refreshCase();const p=[...(state.case.disposal_payments||[])].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))[0];if(!p||p.payment_status!=='paid'||Number(p.paid_amount)!==state.total)throw new Error('精算情報が一致しません。');return {message:'請求・入金・精算完了を保存しました。',detail:`入金:${p.paid_amount}円 / status:${state.case.status}`}}
+    async function checkMember(){const d=await api('/api/public/case?case_no='+encodeURIComponent(state.receipt.case_no)+'&token='+encodeURIComponent(state.receipt.public_token));const c=d.case;if(!c)throw new Error('公開案件を取得できません。');const hasVisit=(c.disposal_appointments||[]).some(x=>x.appointment_type==='visit_estimate'),hasWork=(c.disposal_appointments||[]).some(x=>x.appointment_type==='work'&&x.status==='completed'),hasEstimate=(c.disposal_estimates||[]).some(x=>Number(x.buyback_offset_amount)===5000&&Number(x.total_amount)===state.total),hasReport=(c.disposal_progress_reports||[]).some(x=>x.title==='STEP DISPOSAL-8 作業完了');if(!hasVisit||!hasWork||!hasEstimate||!hasReport||c.status!=='payment_completed')throw new Error(`公開反映不足 visit:${hasVisit} work:${hasWork} estimate:${hasEstimate} report:${hasReport} status:${c.status}`);return {message:'お客様マイページ用APIへ予定・見積り・報告・状態が反映されました。',detail:`status:${c.status} / appointments:${c.disposal_appointments.length}`}}
+    async function checkFinalAdmin(){await refreshCase();const p=(state.case.disposal_photos||[]).some(x=>x.caption?.includes('DISPOSAL-8')),pay=(state.case.disposal_payments||[]).some(x=>x.payment_status==='paid'),est=(state.case.disposal_estimates||[]).some(x=>Number(x.total_amount)===state.total);if(!p||!pay||!est||state.case.status!=='payment_completed')throw new Error(`管理最終確認不足 photo:${p} payment:${pay} estimate:${est} status:${state.case.status}`);return {message:'管理側の写真・見積り・精算・最終状態がすべて正常です。',detail:`status:${state.case.status}`}}
+    async function checkPages(){const files=['index.html','member.html','owner.html','staff.html'];const rows=await Promise.all(files.map(publicPage));return {message:'主要4画面を正常に取得しました。',detail:files.map((f,i)=>`${f}:HTTP ${rows[i].status}`).join(' / ')}}
+
+    async function runAll(){
+      if(!COMPANY.includes('demo'))return toast('デモ環境ではないため実行を停止しました。','error');
+      if(!adminCode())return toast('管理コードを入力してください。','error');
+      if(!confirm('デモデータを初期化し、受付から精算まで実保存の総合テストを開始します。よろしいですか？'))return;
+      state.startedAt=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'numeric',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(new Date());
+      results.clear();state.receipt=null;state.case=null;state.staff=null;state.visit=null;state.work=null;renderDefs();updateSummary();$('testInfo').classList.remove('show');$('runBtn').disabled=true;$('resetBtn').disabled=true;
+      let stopped=false;
+      for(let i=0;i<defs.length;i++){const d=defs[i];running(d.id);showLoading(true,'最終総合テストを実行しています',`${i+1} / ${defs.length}　${d.title}`);try{const r=await d.run();result(d.id,'pass',r?.message||'正常です。',r?.detail||'')}catch(e){result(d.id,'fail',e.name==='AbortError'?'通信がタイムアウトしました。':e.message);stopped=true;break}}
+      showLoading(false);$('runBtn').disabled=false;$('resetBtn').disabled=false;showCaseInfo();if(stopped)toast('総合テストを停止しました。赤い項目を確認してください。','error');else toast('全14項目が正常です。システム完成です。')
+    }
+    async function resetDemo(){
+      if(!COMPANY.includes('demo'))return toast('デモ環境ではないため実行できません。','error');
+      if(!adminCode())return toast('管理コードを入力してください。','error');
+      if(!confirm('総合テスト案件を消去し、営業用DEMO状態へ戻します。よろしいですか？'))return;
+      showLoading(true,'営業用DEMO状態へ戻しています');try{await api('/api/admin/demo-prepare',{admin:true,method:'POST',body:{}});toast('営業用DEMO状態へ戻しました。');$('testStatus').textContent='DEMO初期化済み'}catch(e){toast(e.message,'error')}finally{showLoading(false)}
+    }
+    async function copyReport(){try{await navigator.clipboard.writeText($('reportText').value);toast('総合テスト結果をコピーしました。')}catch{$('reportText').select();document.execCommand('copy');toast('総合テスト結果をコピーしました。')}}
+    function init(){renderDefs();updateSummary();$('runBtn').onclick=runAll;$('resetBtn').onclick=resetDemo;$('copyBtn').onclick=copyReport;$('copyReportBtn').onclick=copyReport;$('clearAdmin').onclick=()=>{$('adminCode').value='';$('adminCode').focus()}}
+    init()
+  })();
+  </script>
+</body>
+</html>
