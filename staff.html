@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#164f48">
   <meta name="description" content="DPRO 不用品回収・遺品整理 LINE 現場スタッフ画面">
-  <title>DPRO 不用品回収・遺品整理｜現場スタッフ</title>
+  <title>DPRO 不用品回収・遺品整理｜現場スタッフ R1</title>
   <script src="config.js"></script>
   <style>
     :root{
@@ -450,8 +450,9 @@
       const btn=$('uploadBtn');btn.disabled=true;showLoading(true,'写真を保存しています',`${state.photos.length}枚`);
       try{
         const phase=$('photoPhase').value,caption=$('photoCaption').value.trim(),visibility=$('photoVisibility').value;
+        const photoType=({'作業前':'before_work','作業中':'during_work','作業後':'after_work','買取査定':'buyback','重要品・確認品':'other'})[phase]||'other';
         for(const x of state.photos){
-          const fd=new FormData();fd.append('case_id',state.current.id);fd.append('file',x.file);fd.append('photo_type','owner_record');fd.append('caption',`【${phase}】${caption||x.file.name}`);fd.append('visibility',visibility);
+          const fd=new FormData();fd.append('case_id',state.current.id);fd.append('file',x.file);fd.append('photo_type',photoType);fd.append('caption',`【${phase}】${caption||x.file.name}`);fd.append('visibility',visibility);
           await api('/api/admin/photos/upload',{method:'POST',body:fd})
         }
         toast(`${state.photos.length}枚の写真を保存しました。`);await refreshCurrent()

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#174f4a">
   <meta name="description" content="DPRO 不用品回収・遺品整理 LINE 最終総合テスト">
-  <title>DPRO 不用品回収・遺品整理｜最終総合テスト</title>
+  <title>DPRO 不用品回収・遺品整理｜最終総合テスト R1</title>
   <script src="config.js"></script>
   <style>
     :root{
@@ -90,7 +90,7 @@
     <section class="report"><div class="report-head"><h2>総合テストレポート</h2><button class="btn secondary" id="copyReportBtn" type="button">レポートをコピー</button></div><div class="report-body"><textarea id="reportText" readonly>まだ総合テストを実行していません。</textarea></div></section>
   </main>
 
-  <footer>DPRO 不用品回収・遺品整理 LINE｜final-test.html｜DISPOSAL-8</footer>
+  <footer>DPRO 不用品回収・遺品整理 LINE｜final-test.html｜DISPOSAL-8-R1</footer>
   <div class="toast" id="toast"></div><div class="loading" id="loading"><div><div class="spinner"></div><strong id="loadingText">総合テストを実行しています</strong><div id="loadingSub"></div></div></div><div class="demo">DEMO TEST</div>
 
   <script>
@@ -172,7 +172,7 @@
     async function makeImage(){
       const canvas=document.createElement('canvas');canvas.width=900;canvas.height=600;const x=canvas.getContext('2d');x.fillStyle='#e8f3f0';x.fillRect(0,0,900,600);x.fillStyle='#123f3b';x.font='bold 50px sans-serif';x.fillText('DPRO DISPOSAL',80,180);x.font='bold 34px sans-serif';x.fillText('STEP DISPOSAL-8 TEST PHOTO',80,250);x.font='24px sans-serif';x.fillText(new Date().toISOString(),80,320);return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('テスト画像生成に失敗しました。')),'image/png'))
     }
-    async function savePhoto(){const blob=await makeImage(),fd=new FormData();fd.append('case_id',state.case.id);fd.append('file',blob,'disposal-step8-test.png');fd.append('photo_type','work_after');fd.append('caption','STEP DISPOSAL-8 作業後テスト写真');fd.append('visibility','customer_public');await api('/api/admin/photos/upload',{admin:true,method:'POST',form:fd});await refreshCase();const p=(state.case.disposal_photos||[]).find(x=>x.caption?.includes('DISPOSAL-8'));if(!p)throw new Error('保存した写真を案件詳細で確認できません。');return {message:'生成した現場写真を非公開Storageへ保存しました。',detail:`visibility:${p.visibility}`}}
+    async function savePhoto(){const blob=await makeImage(),fd=new FormData();fd.append('case_id',state.case.id);fd.append('file',blob,'disposal-step8-test.png');fd.append('photo_type','after_work');fd.append('caption','STEP DISPOSAL-8 作業後テスト写真');fd.append('visibility','customer_public');await api('/api/admin/photos/upload',{admin:true,method:'POST',form:fd});await refreshCase();const p=(state.case.disposal_photos||[]).find(x=>x.caption?.includes('DISPOSAL-8'));if(!p)throw new Error('保存した写真を案件詳細で確認できません。');return {message:'生成した現場写真を非公開Storageへ保存しました。',detail:`visibility:${p.visibility}`}}
     async function runStaffFlow(){await refreshCase();state.work=latestAppointment('work');await updateAppointment(state.work,'arrived');await updateAppointment(state.work,'in_progress');await setCaseStatus('in_progress','作業中');await updateAppointment(state.work,'completed');await setCaseStatus('completion_check','作業完了確認');await refreshCase();const a=latestAppointment('work');if(a.status!=='completed'||state.case.status!=='completion_check')throw new Error(`現場進行結果が不一致です。appointment:${a.status} case:${state.case.status}`);return {message:'到着、作業開始、完了登録が正常に保存されました。',detail:`appointment:${a.status} / case:${state.case.status}`}}
     async function saveReport(){await api('/api/admin/progress/save',{admin:true,method:'POST',body:{case_id:state.case.id,status:'completion_check',title:'STEP DISPOSAL-8 作業完了',customer_comment:'予定していた回収作業が完了しました。総合テストの公開報告です。',internal_comment:'自動総合テスト',visibility:'customer_public'}});await refreshCase();const r=(state.case.disposal_progress_reports||[]).find(x=>x.title==='STEP DISPOSAL-8 作業完了');if(!r||r.visibility!=='customer_public')throw new Error('お客様公開報告を確認できません。');return {message:'お客様向け作業完了報告を保存しました。',detail:r.title}}
     async function savePayment(){await api('/api/admin/payments/save',{admin:true,method:'POST',body:{case_id:state.case.id,payment_status:'paid',payment_method:'cash',billed_amount:state.total,paid_amount:state.total,receipt_note:'STEP DISPOSAL-8 総合テスト精算'}});await setCaseStatus('payment_completed','精算完了');await refreshCase();const p=[...(state.case.disposal_payments||[])].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))[0];if(!p||p.payment_status!=='paid'||Number(p.paid_amount)!==state.total)throw new Error('精算情報が一致しません。');return {message:'請求・入金・精算完了を保存しました。',detail:`入金:${p.paid_amount}円 / status:${state.case.status}`}}
