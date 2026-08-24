@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "checks": {
+    "runtime_security": true,
+    "browser_qa": true,
+    "public_urls": true
+  },
+  "sourceHeadAtQa": "54ad0e68d0489733f9b4f1d4da99223c587c9077",
+  "frontendVersion": "DISPOSAL-PR2-FRONTEND-20260824",
+  "adapterVersion": "DPRO-CONTROL-ADAPTER-1.0-DISPOSAL-20260824-R2",
+  "databaseVersion": "DISPOSAL-DB-PR2-20260824",
+  "finalLockSelfConfirmed": "NO"
+}

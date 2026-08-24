@@ -1,0 +1,82 @@
+{
+  "ok": true,
+  "result": {
+    "product_ready_check": {
+      "ok": true,
+      "versionsAligned": true,
+      "security": {
+        "strictCors": true,
+        "rawLineUserIdAuthoritative": false,
+        "rawAdminCodeProductionAccepted": false,
+        "demoCodeProductionRejected": true,
+        "productionGuard": true,
+        "lineIdToken": {
+          "verifyEndpoint": "LINE oauth2/v2.1/verify",
+          "subAuthoritative": true,
+          "audRequired": true,
+          "expFutureRequired": true,
+          "wrongAudRejected": true,
+          "expiredRejected": true,
+          "validClaimAccepted": true,
+          "activeBindings": 0
+        },
+        "staff": {
+          "signedOpaqueSession": true,
+          "sessionTtlSeconds": 900,
+          "individualProfileSupported": true,
+          "revokeSupported": true,
+          "auditSupported": true,
+          "fieldOwnerAuthority": false
+        },
+        "photo": {
+          "privateBucket": true,
+          "signedUrlBehindAuthorizedRoute": true,
+          "customerPublicExplicit": true
+        },
+        "database": {
+          "rlsEnabled": 18,
+          "disposalTables": 18,
+          "demoPrepareServiceRoleOnly": true,
+          "appointmentGuard": true
+        }
+      },
+      "phoneNormalization": {
+        "ok": true,
+        "values": {
+          "hyphen": "09012345678",
+          "plus81": "09012345678",
+          "zero081": "09012345678",
+          "fullwidth": "09012345678"
+        }
+      },
+      "integration": {
+        "status": "deferred_until_contract",
+        "support_recovery": false,
+        "website_sync": false,
+        "service_binding": false,
+        "activeProductionTenants": 0
+      },
+      "versions": {
+        "frontend": "DISPOSAL-PR2-FRONTEND-20260824",
+        "adapter": "DPRO-CONTROL-ADAPTER-1.0-DISPOSAL-20260824-R2",
+        "database": "DISPOSAL-DB-PR2-20260824"
+      }
+    },
+    "raw_line_rejected": {
+      "status": 401,
+      "code": "RAW_LINE_ID_REJECTED"
+    },
+    "cors_negative": {
+      "status": 403,
+      "code": "ORIGIN_NOT_ALLOWED"
+    },
+    "field_payment_denied": {
+      "status": 403,
+      "code": "CAPABILITY_DENIED"
+    },
+    "revoke_rejected": {
+      "status": 401,
+      "code": "SESSION_EXPIRED"
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "ok": true,
+  "urls": {
+    "config": {
+      "status": 200,
+      "bytes": 10463,
+      "content_type": "application/javascript; charset=utf-8"
+    },
+    "demo_guide": {
+      "status": 200,
+      "bytes": 13057,
+      "content_type": "text/html; charset=utf-8"
+    },
+    "index": {
+      "status": 200,
+      "bytes": 35791,
+      "content_type": "text/html; charset=utf-8"
+    },
+    "member": {
+      "status": 200,
+      "bytes": 25852,
+      "content_type": "text/html; charset=utf-8"
+    },
+    "owner": {
+      "status": 200,
+      "bytes": 96883,
+      "content_type": "text/html; charset=utf-8"
+    },
+    "staff": {
+      "status": 200,
+      "bytes": 46863,
+      "content_type": "text/html; charset=utf-8"
+    },
+    "system_check": {
+      "status": 200,
+      "bytes": 34847,
+      "content_type": "text/html; charset=utf-8"
+    },
+    "product": {
+      "status": 200,
+      "bytes": 33481,
+      "content_type": "text/html; charset=utf-8"
+    },
+    "lp": {
+      "status": 200,
+      "bytes": 668699,
+      "content_type": "text/html; charset=utf-8"
+    },
+    "a4_html": {
+      "status": 200,
+      "bytes": 458157,
+      "content_type": "text/html; charset=utf-8"
+    },
+    "a4_pdf": {
+      "status": 200,
+      "bytes": 2654793,
+      "content_type": "application/pdf"
+    }
+  }
+}
