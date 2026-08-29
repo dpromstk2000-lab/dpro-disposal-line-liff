@@ -160,3 +160,18 @@ window.DPRO_DISPOSAL_CONFIG = Object.freeze({
     window.setTimeout(() => { if (appView && !appView.classList.contains("hidden")) return; loginButton.click(); }, 120);
   });
 })();
+
+/* DPRO TUTORIAL / DISPOSAL / BATCH-09 / R3 LOADER */
+(() => {
+  "use strict";
+  const page = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+  if (page !== "owner.html") return;
+  window.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector('script[data-dpro-tutorial-r3="1"]')) return;
+    const s = document.createElement("script");
+    s.src = "dpro-tutorial-r3.js";
+    s.async = true;
+    s.dataset.dproTutorialR3 = "1";
+    document.head.appendChild(s);
+  }, { once: true });
+})();
