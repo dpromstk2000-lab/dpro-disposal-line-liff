@@ -1,0 +1,110 @@
+name: DISPOSAL Tutorial R4 LIVE QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'guide-center.html'
+      - 'dpro-tutorial-r3.js'
+      - '.github/workflows/disposal-tutorial-r4-live-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  live-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Wait for GitHub Pages deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/guide-center.html"
+          for i in $(seq 1 45); do
+            BODY="$(curl -fsSL --max-time 15 "$URL?qa=${GITHUB_SHA}" || true)"
+            if printf '%s' "$BODY" | grep -q 'DPRO-TUTORIAL-DISPOSAL-B09-R4-GUIDE-V1.0-20260829'; then
+              echo "R4 Guide Center is live."
+              exit 0
+            fi
+            sleep 8
+          done
+          echo "R4 Guide Center did not become live in time." >&2
+          exit 1
+      - name: Run exact four-width R4 LIVE QA
+        shell: bash
+        run: |
+          cat > disposal-r4-qa.mjs <<'NODE'
+          import fs from 'node:fs';
+          import { chromium } from 'playwright';
+          const GUIDE='https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/guide-center.html?qa=r4live';
+          const PRODUCT='https://dpromstk2000-lab.github.io/dpro-line-systems-site/systems/disposal.html';
+          const KEY='dpro_tutorial_disposal_b09_v1';
+          const expected=[{"id": "disposal-b09-ft10-01", "title": "管理画面の入口", "copy": "オーナー管理画面全体と現在のダッシュボード入口を確認。保存・送信は行いません。", "view": "dashboard", "primary": "#view-dashboard .view-head", "fallback": ["#view-dashboard", ".topbar", "#appView"]}, {"id": "disposal-b09-ft10-02", "title": "ダッシュボード指標", "copy": "受付・見積・作業などの主要指標（KPI）の確認場所を案内します。", "view": "dashboard", "primary": "#view-dashboard .kpis", "fallback": ["#view-dashboard", ".kpi"]}, {"id": "disposal-b09-ft10-03", "title": "優先対応と本日の予定", "copy": "優先対応と本日の予定を確認する場所だけを案内します。案件更新はしません。", "view": "dashboard", "primary": "#view-dashboard .grid2", "fallback": ["#priorityList", "#todayPreview", "#view-dashboard .card"]}, {"id": "disposal-b09-ft10-04", "title": "案件一覧の入口", "copy": "管理メニューの「案件一覧」の位置を確認します。クリックはローカル画面切替のみです。", "view": "dashboard", "primary": "#nav button[data-view=\"cases\"]", "fallback": ["#nav", ".sidebar"]}, {"id": "disposal-b09-ft10-05", "title": "案件検索・絞り込み", "copy": "受付番号・氏名・電話番号・相談内容と状態で探す検索欄の場所を確認します。実データは入力しません。", "view": "cases", "primary": "#view-cases .filters", "fallback": ["#caseSearch", "#caseStatusFilter", "#view-cases .card"]}, {"id": "disposal-b09-ft10-06", "title": "顧客検索の入口", "copy": "管理メニューの「顧客検索」の位置を確認します。業務データは変更しません。", "view": "cases", "primary": "#nav button[data-view=\"customers\"]", "fallback": ["#nav", ".sidebar"]}, {"id": "disposal-b09-ft10-07", "title": "顧客検索画面", "copy": "氏名・電話番号・顧客番号の検索画面を確認します。実在個人情報は入力しません。", "view": "customers", "primary": "#customerSearch", "fallback": ["#view-customers .filters", "#view-customers .card"]}, {"id": "disposal-b09-ft10-08", "title": "電話・店頭受付の入口", "copy": "「電話・店頭受付」タブの位置を確認します。新規受付登録は行いません。", "view": "customers", "primary": "#nav button[data-view=\"intake\"]", "fallback": ["#nav", ".sidebar"]}, {"id": "disposal-b09-ft10-09", "title": "受付フォーム", "copy": "既存顧客検索と受付内容フォームの配置を確認します。入力・登録・送信は行いません。", "view": "intake", "primary": "#intakeForm", "fallback": ["#view-intake .card", "#view-intake"]}, {"id": "disposal-b09-ft10-10", "title": "訪問・作業予定", "copy": "訪問・作業予定の日別確認画面を案内してFirst10完了。予定の登録・変更は行いません。", "view": "schedule", "primary": "#view-schedule .view-head", "fallback": ["#scheduleDate", "#scheduleList", "#view-schedule"]}];
+          const viewports=[{name:'pc_1440',width:1440,height:1000},{name:'ipad_1024',width:1024,height:768},{name:'mobile_390',width:390,height:844},{name:'mobile_320',width:320,height:720}];
+          const report={version:'R4-LIVE-QA-V1.0-20260829',sha:process.env.GITHUB_SHA,guide_count:10,viewports:[],product:{},overall:'PASS'};
+          const browser=await chromium.launch({headless:true});
+          const writeMethods=new Set(['POST','PUT','PATCH','DELETE']);
+          const normalize=(s)=>String(s||'');
+          async function waitOwner(page){
+            await page.waitForURL(/owner\.html/,{timeout:30000});
+            await page.waitForSelector('#appView:not(.hidden)',{timeout:30000});
+            await page.waitForFunction(()=>window.DPRO_DISPOSAL_TUTORIAL_R3?.steps?.length===10,{timeout:20000});
+            await page.waitForFunction(()=>getComputedStyle(document.querySelector('#dproTutCard')).display==='block',{timeout:20000});
+          }
+          async function inspect(vp){
+            const ctx=await browser.newContext({viewport:{width:vp.width,height:vp.height},hasTouch:vp.width<=390,isMobile:false});
+            const page=await ctx.newPage();const pageErrors=[];const consoleErrors=[];const requests=[];
+            page.on('pageerror',e=>pageErrors.push(normalize(e.message||e)));
+            page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
+            page.on('request',r=>requests.push({method:r.method(),url:r.url()}));
+            await page.goto(GUIDE,{waitUntil:'domcontentloaded',timeout:45000});
+            await page.waitForSelector('#guideGrid .guide-step-card');
+            await page.evaluate((k)=>localStorage.removeItem(k),KEY); await page.reload({waitUntil:'domcontentloaded'});
+            const r={name:vp.name,width:vp.width,height:vp.height,checks:{},pageErrors,consoleErrors,unsafeWriteRequests:[]};
+            const dims=await page.evaluate(()=>({innerWidth,doc:document.documentElement.scrollWidth,body:document.body.scrollWidth}));
+            r.horizontalOverflow=Math.max(0,dims.doc-dims.innerWidth,dims.body-dims.innerWidth);r.checks.overflow0=r.horizontalOverflow===0;
+            const cards=await page.$$eval('.guide-step-card',els=>els.map(e=>({id:e.dataset.stepId,view:e.dataset.view,primary:e.dataset.primary,fallback:(e.dataset.fallback||'').split('||').filter(Boolean)})));
+            r.guideCount=cards.length;r.checks.guideCount=cards.length===10;r.checks.alignment=cards.length===expected.length&&cards.every((c,i)=>c.id===expected[i].id&&c.view===expected[i].view&&c.primary===expected[i].primary&&JSON.stringify(c.fallback)===JSON.stringify(expected[i].fallback));
+            // Keyboard focus: Tab to Start and verify visible outline.
+            for(let i=0;i<8;i++){if(await page.evaluate(()=>document.activeElement?.id==='gcStart'))break;await page.keyboard.press('Tab')}
+            r.checks.keyboardFocus=await page.evaluate(()=>{const e=document.querySelector('#gcStart');const s=getComputedStyle(e);return document.activeElement===e&&s.outlineStyle!=='none'&&parseFloat(s.outlineWidth)>=2});
+            // Start -> step 1.
+            await page.click('#gcStart');await waitOwner(page);r.checks.start=(await page.textContent('.dproTutStepId'))?.trim()===expected[0].id;
+            // Interrupt at step 5 -> Guide -> Resume same step.
+            await page.evaluate(()=>window.DPRO_DISPOSAL_TUTORIAL_R3.goTo(4));await page.evaluate(()=>window.DPRO_DISPOSAL_TUTORIAL_R3.close());
+            await page.goto(GUIDE,{waitUntil:'domcontentloaded'});await page.click('#gcResume');await waitOwner(page);r.checks.resume=(await page.textContent('.dproTutStepId'))?.trim()===expected[4].id;
+            // Skip -> Guide -> Replay -> step 1.
+            await page.click('.dproTutActions .skip');await page.goto(GUIDE,{waitUntil:'domcontentloaded'});await page.click('#gcReplay');await waitOwner(page);r.checks.replay=(await page.textContent('.dproTutStepId'))?.trim()===expected[0].id;
+            r.unsafeWriteRequests=requests.filter(x=>writeMethods.has(x.method)&&!/\/api\/auth\//.test(x.url));
+            r.checks.pageError0=pageErrors.length===0;r.checks.consoleError0=consoleErrors.length===0;r.checks.unsafeWrite0=r.unsafeWriteRequests.length===0;r.checks.businessMutation0=r.unsafeWriteRequests.length===0;
+            r.pass=Object.values(r.checks).every(Boolean);await ctx.close();return r;
+          }
+          for(const vp of viewports){const r=await inspect(vp);report.viewports.push(r);if(!r.pass)report.overall='FAIL'}
+          // Product regression guard at mobile widths only; R4 does not modify Product Site.
+          for(const vp of [{name:'390',width:390,height:844},{name:'320',width:320,height:720}]){
+            const ctx=await browser.newContext({viewport:{width:vp.width,height:vp.height}});const p=await ctx.newPage();const resp=await p.goto(PRODUCT,{waitUntil:'domcontentloaded',timeout:45000});const d=await p.evaluate(()=>({w:innerWidth,doc:document.documentElement.scrollWidth,body:document.body.scrollWidth,text:(document.body?.innerText||'').length}));report.product[vp.name]={status:resp?.status()||0,overflow:Math.max(0,d.doc-d.w,d.body-d.w),bodyTextLength:d.text,pass:(resp?.status()===200&&Math.max(0,d.doc-d.w,d.body-d.w)===0&&d.text>100)};if(!report.product[vp.name].pass)report.overall='FAIL';await ctx.close();
+          }
+          report.gates={GUIDE_COUNT:report.viewports.every(x=>x.checks.guideCount)?10:'FAIL',GUIDE_TUTORIAL_ALIGNMENT:report.viewports.every(x=>x.checks.alignment)?'PASS':'FAIL',START:report.viewports.every(x=>x.checks.start)?'PASS':'FAIL',RESUME:report.viewports.every(x=>x.checks.resume)?'PASS':'FAIL',REPLAY:report.viewports.every(x=>x.checks.replay)?'PASS':'FAIL',KEYBOARD_FOCUS:report.viewports.every(x=>x.checks.keyboardFocus)?'PASS':'FAIL','1440x1000':report.viewports[0].pass?'PASS':'FAIL','1024x768':report.viewports[1].pass?'PASS':'FAIL','390x844':report.viewports[2].pass?'PASS':'FAIL','320x720':report.viewports[3].pass?'PASS':'FAIL','390_OVERFLOW':report.viewports[2].horizontalOverflow,'320_OVERFLOW':report.viewports[3].horizontalOverflow,PAGEERROR_0:report.viewports.every(x=>x.checks.pageError0)?'PASS':'FAIL',TUTORIAL_GUIDE_CONSOLE_ERROR_0:report.viewports.every(x=>x.checks.consoleError0)?'PASS':'FAIL',UNSAFE_WRITE_REQUEST_0:report.viewports.every(x=>x.checks.unsafeWrite0)?'PASS':'FAIL',BUSINESS_MUTATION_0:report.viewports.every(x=>x.checks.businessMutation0)?'PASS':'FAIL',PRODUCT_REGRESSION_0:Object.values(report.product).every(x=>x.pass)?'PASS':'FAIL'};
+          fs.writeFileSync('R4_LIVE_QA_EVIDENCE.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));await browser.close();if(report.overall!=='PASS')process.exit(1);
+          NODE
+          node disposal-r4-qa.mjs
+      - name: Upload R4 QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: DISPOSAL_R4_LIVE_QA_EVIDENCE
+          path: R4_LIVE_QA_EVIDENCE.json
+          if-no-files-found: error
