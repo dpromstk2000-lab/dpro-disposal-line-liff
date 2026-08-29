@@ -1,4 +1,4 @@
-/* DPRO TUTORIAL / DISPOSAL / BATCH-09 / R3 / STANDARD V1.1 */
+/* DPRO TUTORIAL / DISPOSAL / BATCH-09 / R3 / STANDARD V1.2 / KEYBOARD-FOCUS FIX */
 (() => {
   'use strict';
   const VERSION = 'DPRO-TUTORIAL-DISPOSAL-B09-R3-V1.0-20260829';
@@ -136,12 +136,12 @@
     body.querySelector('.primary').onclick = () => index === steps.length-1 ? complete(false) : renderStep(index+1);
     body.querySelector('.skip').onclick = () => complete(true);
     card.style.display='block'; highlight.style.display='block'; launcher.style.display='none'; restorePosition();
-    if (focus) requestAnimationFrame(()=>body.querySelector('.primary')?.focus());
+    if (focus) body.querySelector('.primary')?.focus({preventScroll:true});
   };
   const renderComplete = (skipped=false, focus=true) => {
     currentTarget=null;highlight.style.display='none';
     body.innerHTML=`<div class="dproTutComplete"><strong>${skipped?'ガイドをスキップしました':'First10 完了'}</strong><p>いつでも最初から再生できます。</p><button class="replay" type="button">最初からもう一度見る</button></div>`;
-    body.querySelector('.replay').onclick=()=>replay();card.style.display='block';launcher.style.display='none';restorePosition();if(focus)requestAnimationFrame(()=>body.querySelector('.replay')?.focus());
+    body.querySelector('.replay').onclick=()=>replay();card.style.display='block';launcher.style.display='none';restorePosition();if(focus)body.querySelector('.replay')?.focus({preventScroll:true});
   };
   const open = () => {
     lastFocus = document.activeElement;
@@ -149,7 +149,7 @@
     if (s.status==='completed'||s.status==='skipped') renderComplete(s.status==='skipped'); else renderStep(s.status==='in_progress'?s.step:0);
   };
   const close = () => {
-    card.style.display='none';highlight.style.display='none';currentTarget=null;launcher.style.display='block';syncLauncher();requestAnimationFrame(()=>launcher.focus());
+    card.style.display='none';highlight.style.display='none';currentTarget=null;launcher.style.display='block';syncLauncher();launcher.focus({preventScroll:true});
   };
   const complete = (skipped) => { writeState({status:skipped?'skipped':'completed',step:steps.length-1}); renderComplete(skipped); };
   const replay = () => { writeState({status:'in_progress',step:0}); renderStep(0); };
