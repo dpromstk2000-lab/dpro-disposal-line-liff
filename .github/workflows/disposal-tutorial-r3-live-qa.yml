@@ -50,7 +50,7 @@ jobs:
       - name: Run exact four-width LIVE QA
         shell: bash
         run: |
-          cat > /tmp/disposal-r3-qa.mjs <<'NODE'
+          cat > disposal-r3-qa.mjs <<'NODE'
           import fs from 'node:fs';
           import { chromium } from 'playwright';
 
@@ -185,7 +185,7 @@ jobs:
           await browser.close();
           if(report.overall!=='PASS') process.exit(1);
           NODE
-          node /tmp/disposal-r3-qa.mjs
+          node disposal-r3-qa.mjs
 
       - name: Upload R3 QA evidence
         if: always()
