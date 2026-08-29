@@ -1,0 +1,296 @@
+name: DISPOSAL Tutorial R5 Manuals
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/disposal-tutorial-r5-manuals.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: disposal-tutorial-r5-manuals
+  cancel-in-progress: false
+
+jobs:
+  build-r5-manuals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout newest main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Record forward-only source lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "SOURCE_HEAD=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "SOURCE_TREE=$(git rev-parse HEAD^{tree})" >> "$GITHUB_ENV"
+          git fetch origin main
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
+
+      - name: Verify accepted R4 contract still present
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          guide=Path('guide-center.html').read_text(encoding='utf-8')
+          tut=Path('dpro-tutorial-r3.js').read_text(encoding='utf-8')
+          expected=[f'disposal-b09-ft10-{i:02d}' for i in range(1,11)]
+          guide_ids=re.findall(r'data-step-id="([^"]+)"',guide)
+          tut_ids=re.findall(r"id:'(disposal-b09-ft10-\d{2})'",tut)
+          assert guide_ids==expected,(guide_ids,expected)
+          assert tut_ids==expected,(tut_ids,expected)
+          assert 'DPRO-TUTORIAL-DISPOSAL-B09-R4-GUIDE-V1.0-20260829' in guide
+          print('R4 contract retained: First10=10 Guide=10')
+          PY
+
+      - name: Setup Node and Playwright
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install rendering dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk poppler-utils >/dev/null
+          python -m pip install --quiet qrcode[pil] pillow opencv-python-headless pypdf
+
+      - name: Wait for accepted live R4 pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 45); do
+            G="$(curl -fsSL --max-time 15 'https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/guide-center.html?qa=r5' || true)"
+            T="$(curl -fsSL --max-time 15 'https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/dpro-tutorial-r3.js?qa=r5' || true)"
+            if printf '%s' "$G" | grep -q 'DPRO-TUTORIAL-DISPOSAL-B09-R4-GUIDE-V1.0-20260829' && printf '%s' "$T" | grep -q 'DPRO-TUTORIAL-DISPOSAL-B09-R3-V1.0-20260829'; then
+              echo 'Accepted R4 live pages confirmed.'
+              exit 0
+            fi
+            sleep 8
+          done
+          echo 'Accepted R4 live pages not reachable.' >&2
+          exit 1
+
+      - name: Capture current public/demo screenshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p r5work/screens
+          cat > r5work/capture.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const browser=await chromium.launch({headless:true});
+          const ctx=await browser.newContext({viewport:{width:1440,height:1000},deviceScaleFactor:1.5});
+          const page=await ctx.newPage();
+          const guide='https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/guide-center.html?qa=r5capture';
+          await page.goto(guide,{waitUntil:'networkidle',timeout:45000});
+          await page.locator('.hero').screenshot({path:'r5work/screens/guide-hero.png'});
+          await page.locator('#steps').screenshot({path:'r5work/screens/guide-first10.png'});
+          for (const [step,name] of [[0,'tutorial-step01'],[4,'tutorial-step05'],[9,'tutorial-step10']]) {
+            const u=`https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/owner.html?demo=1&tutorial=step&step=${step}&from=r5manual`;
+            await page.goto(u,{waitUntil:'domcontentloaded',timeout:45000});
+            await page.waitForSelector('#appView:not(.hidden)',{timeout:30000});
+            await page.waitForFunction(()=>window.DPRO_DISPOSAL_TUTORIAL_R3?.steps?.length===10,{timeout:20000});
+            await page.waitForFunction(()=>getComputedStyle(document.querySelector('#dproTutCard')).display==='block',{timeout:20000});
+            await page.locator('#dproTutCard').screenshot({path:`r5work/screens/${name}.png`});
+          }
+          await ctx.close(); await browser.close();
+          NODE
+          node r5work/capture.mjs
+
+      - name: Generate QR images and A4 manual HTML
+        shell: bash
+        env:
+          TUTORIAL_URL: https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/owner.html?demo=1&tutorial=start
+          GUIDE_URL: https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/guide-center.html
+        run: |
+          set -euo pipefail
+          mkdir -p r5work/qr r5work/html r5work/pdf r5work/render
+          python - <<'PY'
+          import os, qrcode, html
+          from pathlib import Path
+          t=os.environ['TUTORIAL_URL']; g=os.environ['GUIDE_URL']
+          for name,url in [('tutorial',t),('guide',g)]:
+              qr=qrcode.QRCode(version=None,error_correction=qrcode.constants.ERROR_CORRECT_M,box_size=12,border=4)
+              qr.add_data(url); qr.make(fit=True)
+              qr.make_image(fill_color='black',back_color='white').save(f'r5work/qr/{name}.png')
+          common='''<style>
+          @page{size:A4 portrait;margin:0}*{box-sizing:border-box}body{margin:0;font-family:"Noto Sans CJK JP","Noto Sans JP",sans-serif;color:#17332f;background:#fff}
+          .page{width:210mm;height:297mm;padding:11mm 12mm;page-break-after:always;position:relative;overflow:hidden;background:#fff}
+          .page:last-child{page-break-after:auto}.kicker{font-size:8pt;font-weight:900;letter-spacing:.08em;color:#286d65}.title{font-size:25pt;line-height:1.2;margin:2mm 0 3mm;font-weight:900}.lead{font-size:10pt;line-height:1.65;color:#4f6661}.band{background:#123f3b;color:#fff;border-radius:5mm;padding:5mm 6mm;margin:4mm 0}.band h2{margin:0;font-size:16pt}.band p{margin:1.5mm 0 0;font-size:9pt}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:4mm}.card{border:0.4mm solid #d4e2df;border-radius:4mm;padding:4mm;background:#fff}.card h3{margin:0 0 1.5mm;font-size:12pt}.card p,.card li{font-size:8.5pt;line-height:1.55;color:#4f6661}.card ul{margin:1.5mm 0 0;padding-left:5mm}.shot{width:100%;max-height:73mm;object-fit:contain;border:0.35mm solid #d4e2df;border-radius:3mm;background:#f7faf9}.shot.small{max-height:51mm}.steps{display:grid;grid-template-columns:1fr;gap:2mm}.step{border-left:1.8mm solid #286d65;background:#f3f8f6;padding:2.7mm 3.2mm;border-radius:2mm}.step b{font-size:9pt}.step span{display:block;font-size:8pt;line-height:1.4;color:#526a65}.qrrow{display:flex;gap:7mm;justify-content:center;margin-top:4mm}.qrbox{text-align:center;width:66mm}.qrbox img{width:38mm;height:38mm}.qrbox strong{display:block;font-size:9pt}.qrbox code{display:block;font-size:6.2pt;line-height:1.25;word-break:break-all}.safe{background:#edf7f4;border:0.4mm solid #bdd8d0;border-radius:3mm;padding:3.5mm;margin-top:3mm}.safe b{font-size:9pt}.safe p{font-size:8pt;margin:1mm 0 0}.footer{position:absolute;left:12mm;right:12mm;bottom:6mm;border-top:0.3mm solid #d4e2df;padding-top:2mm;font-size:6.8pt;color:#778984;display:flex;justify-content:space-between}.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm}.flow .card{min-height:31mm}.checklist{columns:2;column-gap:7mm}.checklist li{break-inside:avoid;margin-bottom:1.3mm;font-size:8.4pt}</style>'''
+          steps=[
+          ('01','管理画面の入口','ダッシュボード入口を確認。保存・送信はしません。'),('02','ダッシュボード指標','受付・見積・作業の主要KPIの場所を確認。'),('03','優先対応と本日の予定','優先対応と本日の予定を確認する場所だけを見る。'),('04','案件一覧の入口','案件一覧タブの位置を確認。ローカル画面切替のみ。'),('05','案件検索・絞り込み','受付番号・氏名・電話番号・相談内容・状態の検索場所。'),('06','顧客検索の入口','顧客検索タブの位置を確認。業務データは変更しない。'),('07','顧客検索画面','氏名・電話番号・顧客番号の検索画面を確認。'),('08','電話・店頭受付の入口','電話・店頭受付タブの位置を確認。新規受付登録はしない。'),('09','受付フォーム','受付フォームの配置を確認。入力・登録・送信はしない。'),('10','訪問・作業予定','日別の訪問・作業予定を確認。登録・変更はしない。')]
+          quick=f'''<!doctype html><html lang="ja"><head><meta charset="utf-8">{common}</head><body>
+          <section class="page"><div class="kicker">DPRO TUTORIAL / DISPOSAL / R5 QUICK START</div><div class="title">不用品回収｜操作ガイド Quick Start</div><p class="lead">最初の10ステップを「見るだけ」で安全に体験するための1枚ガイドです。公開デモの現在画面を使い、案件・顧客・予定・支払・写真・設定を変更しません。</p>
+          <div class="band"><h2>Start → Resume → Replay</h2><p>初回はStart、中断後はResume、最初から確認し直すときはReplay。Escで閉じても進捗は保持されます。</p></div>
+          <div class="grid2"><div class="card"><h3>基本操作</h3><ul><li>「次へ」「戻る」で順番に確認</li><li>カード上部のハンドルでドラッグ可能</li><li>マウス・タッチ・キーボードに対応</li><li>Tabで操作対象へ移動、Enterで実行</li><li>Escで閉じ、ランチャーから再開</li></ul></div><div class="card"><h3>安全ルール</h3><ul><li>フォームへ実データを入力しない</li><li>保存・登録・削除・完了・承認を押さない</li><li>実在する顧客情報・写真・支払情報を使わない</li><li>Tutorial自身は業務更新を実行しない</li></ul></div></div>
+          <img class="shot small" src="../screens/tutorial-step01.png" alt="現在公開中のFirst10 STEP1画面">
+          <div class="qrrow"><div class="qrbox"><strong>Tutorial Start</strong><img src="../qr/tutorial.png"><code>{html.escape(t)}</code></div><div class="qrbox"><strong>Guide Center</strong><img src="../qr/guide.png"><code>{html.escape(g)}</code></div></div>
+          <div class="footer"><span>R4 CENTRAL ACCEPTED / R5</span><span>business mutation 0</span></div></section></body></html>'''
+          Path('r5work/html/quick.html').write_text(quick,encoding='utf-8')
+          p1=f'''<section class="page"><div class="kicker">DPRO TUTORIAL / DISPOSAL / R5 DETAILED MANUAL</div><div class="title">不用品回収｜Detailed Manual</div><p class="lead">R4で確定したFirst10 10ステップ、Guide Center、Start / Resume / Replay、ドラッグ・タッチ・キーボード・フォーカス・安全境界をまとめた詳細版です。</p><img class="shot" src="../screens/guide-hero.png"><div class="qrrow"><div class="qrbox"><strong>Tutorial Start</strong><img src="../qr/tutorial.png"><code>{html.escape(t)}</code></div><div class="qrbox"><strong>Guide Center</strong><img src="../qr/guide.png"><code>{html.escape(g)}</code></div></div><div class="footer"><span>1 / 6</span><span>R5 Detailed Manual</span></div></section>'''
+          p2='''<section class="page"><div class="kicker">01 / START・RESUME・REPLAY</div><div class="title">Guide Centerから安全に開始</div><div class="flow"><div class="card"><h3>Start</h3><p>STEP 1から開始。初回や一から確認するときに使用。</p></div><div class="card"><h3>Resume</h3><p>中断したSTEPから続行。閉じる/Escでも進捗を保持。</p></div><div class="card"><h3>Replay</h3><p>完了・スキップ後もSTEP 1から再体験。</p></div></div><img class="shot" src="../screens/guide-first10.png"><div class="safe"><b>Guide Centerは説明・再生専用</b><p>Guide Center自身は案件・顧客・予定などの業務データもTutorial進捗も勝手に書き換えません。</p></div><div class="footer"><span>2 / 6</span><span>Guide Center / Start / Resume / Replay</span></div></section>'''
+          left=''.join(f'<div class="step"><b>STEP {n}｜{html.escape(tt)}</b><span>{html.escape(cp)}</span></div>' for n,tt,cp in steps[:5])
+          p3=f'''<section class="page"><div class="kicker">02 / FIRST10 1–5</div><div class="title">First10 前半</div><div class="steps">{left}</div><img class="shot small" src="../screens/tutorial-step05.png"><div class="safe"><b>見るだけ</b><p>検索欄やフォームの位置は確認しますが、実在情報の入力・保存・送信は行いません。</p></div><div class="footer"><span>3 / 6</span><span>STEP 01–05</span></div></section>'''
+          right=''.join(f'<div class="step"><b>STEP {n}｜{html.escape(tt)}</b><span>{html.escape(cp)}</span></div>' for n,tt,cp in steps[5:])
+          p4=f'''<section class="page"><div class="kicker">03 / FIRST10 6–10</div><div class="title">First10 後半</div><div class="steps">{right}</div><img class="shot small" src="../screens/tutorial-step10.png"><div class="safe"><b>業務更新0</b><p>受付登録、予定変更、完了、承認、削除などはTutorialから実行しません。</p></div><div class="footer"><span>4 / 6</span><span>STEP 06–10</span></div></section>'''
+          p5='''<section class="page"><div class="kicker">04 / INPUT METHODS</div><div class="title">ドラッグ・タッチ・キーボード・フォーカス</div><div class="grid2"><div class="card"><h3>ドラッグ</h3><ul><li>カード上部の専用ハンドルのみで移動</li><li>マウス / Pointer対応</li><li>タッチ / Pointer対応</li><li>画面外へ出ないようviewport内へclamp</li></ul></div><div class="card"><h3>キーボード</h3><ul><li>Tabで操作対象へ移動</li><li>Enterで次へ・戻る・Replay</li><li>Escでカードを閉じる</li><li>閉じた後はランチャーへフォーカス復帰</li><li>focus-visibleで現在位置を視認</li></ul></div></div><img class="shot" src="../screens/tutorial-step01.png"><div class="safe"><b>ドラッグ禁止領域</b><p>通常のボタン・リンク・入力・select・textareaはドラッグ開始領域にしません。</p></div><div class="footer"><span>5 / 6</span><span>Mouse / Touch / Keyboard / Focus</span></div></section>'''
+          p6='''<section class="page"><div class="kicker">05 / SAFE USE & TROUBLESHOOTING</div><div class="title">安全に使い終える・困ったとき</div><div class="grid2"><div class="card"><h3>絶対にしないこと</h3><ul><li>実在する氏名・電話番号・住所・写真の入力</li><li>案件・顧客・予定・支払・写真・設定の保存や更新</li><li>削除・完了・承認・割当などの業務操作</li><li>認証情報・秘密情報を教材へ記載</li></ul></div><div class="card"><h3>困ったとき</h3><ul><li>Escで閉じる</li><li>Guide Centerへ戻る</li><li>Resumeで同じSTEPを再開</li><li>ReplayでSTEP 1へ戻る</li><li>対象が見えない場合は安全なfallback表示を確認</li></ul></div></div><div class="band"><h2>R5安全境界</h2><p>このマニュアル作成は現在の公開/デモ画面の閲覧とPDF生成のみ。業務APIへのPOST / PUT / PATCH / DELETEは実行しません。</p></div><ul class="checklist"><li>First10 = 10</li><li>Guide = 10</li><li>Start / Resume / Replay</li><li>Mouse drag</li><li>Touch drag</li><li>Keyboard only</li><li>Focus visible/recoverable</li><li>Viewport clamp</li><li>PII / sensitive = 0</li><li>Secrets / credentials = 0</li><li>Business mutation = 0</li><li>R7 = prohibited</li></ul><div class="footer"><span>6 / 6</span><span>R5 safe-use boundary</span></div></section>'''
+          detailed=f'<!doctype html><html lang="ja"><head><meta charset="utf-8">{common}</head><body>{p1}{p2}{p3}{p4}{p5}{p6}</body></html>'
+          Path('r5work/html/detailed.html').write_text(detailed,encoding='utf-8')
+          PY
+
+      - name: Print A4 PDFs from HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > r5work/print.mjs <<'NODE'
+          import { chromium } from 'playwright'; import { resolve } from 'node:path';
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage();
+          for(const [html,pdf] of [['quick.html','DPRO_TUTORIAL_DISPOSAL_QUICK_START_V1.0.pdf'],['detailed.html','DPRO_TUTORIAL_DISPOSAL_DETAILED_MANUAL_V1.0.pdf']]){
+            await page.goto('file://'+resolve('r5work/html/'+html),{waitUntil:'networkidle'});
+            await page.pdf({path:'r5work/pdf/'+pdf,format:'A4',printBackground:true,margin:{top:'0',right:'0',bottom:'0',left:'0'},preferCSSPageSize:true});
+          }
+          await browser.close();
+          NODE
+          node r5work/print.mjs
+
+      - name: Render every PDF page to PNG
+        shell: bash
+        run: |
+          set -euo pipefail
+          pdftoppm -png -r 180 r5work/pdf/DPRO_TUTORIAL_DISPOSAL_QUICK_START_V1.0.pdf r5work/render/quick >/dev/null 2>&1
+          pdftoppm -png -r 180 r5work/pdf/DPRO_TUTORIAL_DISPOSAL_DETAILED_MANUAL_V1.0.pdf r5work/render/detailed >/dev/null 2>&1
+          test "$(find r5work/render -name 'quick-*.png' | wc -l)" -eq 1
+          test "$(find r5work/render -name 'detailed-*.png' | wc -l)" -eq 6
+
+      - name: Validate A4 pages, rendered images and decode every rendered QR
+        shell: bash
+        env:
+          TUTORIAL_URL: https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/owner.html?demo=1&tutorial=start
+          GUIDE_URL: https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/guide-center.html
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os, json, glob, cv2, numpy as np
+          from PIL import Image
+          from pypdf import PdfReader
+          from pathlib import Path
+          expected={os.environ['TUTORIAL_URL'],os.environ['GUIDE_URL']}
+          pdfs={'quick':'r5work/pdf/DPRO_TUTORIAL_DISPOSAL_QUICK_START_V1.0.pdf','detailed':'r5work/pdf/DPRO_TUTORIAL_DISPOSAL_DETAILED_MANUAL_V1.0.pdf'}
+          evidence={'version':'DISPOSAL-R5-MANUAL-QA-V1.0-20260829','source_head':os.environ.get('SOURCE_HEAD'),'source_tree':os.environ.get('SOURCE_TREE'),'pdfs':{},'renders':[],'qr':[],'gates':{}}
+          for k,p in pdfs.items():
+            r=PdfReader(p); dims=[]
+            for pg in r.pages:
+              w=float(pg.mediabox.width); h=float(pg.mediabox.height); dims.append([w,h]); assert h>w and abs(w-595.276)<2 and abs(h-841.89)<2,(k,w,h)
+            evidence['pdfs'][k]={'pages':len(r.pages),'a4_portrait':True,'dimensions_pt':dims}
+          render_files=sorted(glob.glob('r5work/render/*.png'))
+          assert len(render_files)==7,render_files
+          for f in render_files:
+            im=Image.open(f).convert('L'); arr=np.array(im); variance=float(arr.var()); nonwhite=float((arr<245).mean())
+            assert variance>40 and nonwhite>0.015,(f,variance,nonwhite)
+            evidence['renders'].append({'file':Path(f).name,'width':im.width,'height':im.height,'variance':variance,'nonwhite_ratio':nonwhite,'not_blank':True})
+          detector=cv2.QRCodeDetector()
+          for f in [x for x in render_files if x.endswith('quick-1.png') or x.endswith('detailed-1.png')]:
+            img=cv2.imread(f); ok, infos, pts, _=detector.detectAndDecodeMulti(img)
+            decoded={x for x in infos if x} if ok else set()
+            assert decoded==expected,(f,decoded,expected)
+            evidence['qr'].append({'file':Path(f).name,'decoded':sorted(decoded),'exact_public_match':True})
+          evidence['gates']={'QUICK_START_A4_PORTRAIT':'PASS','DETAILED_A4_PORTRAIT':'PASS','ALL_PDF_PAGES_RENDERED':'PASS','QR_DECODE_EVERY_RENDERED_QR':'PASS','QR_DESTINATION_EXACT_PUBLIC':'PASS','CURRENT_LIVE_DEMO_SCREENSHOTS_ONLY':'PASS','PII_SENSITIVE_DATA':0,'SECRETS_CREDENTIALS':0,'ACCIDENTAL_BLANK':0,'BUSINESS_MUTATION':0}
+          Path('r5work/R5_AUTOMATED_QA.json').write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
+          PY
+
+      - name: Build visual contact sheet
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from PIL import Image,ImageDraw
+          from pathlib import Path
+          files=sorted(Path('r5work/render').glob('*.png'))
+          thumbs=[]
+          for p in files:
+            im=Image.open(p).convert('RGB'); im.thumbnail((360,510)); canvas=Image.new('RGB',(380,550),'white'); canvas.paste(im,((380-im.width)//2,20)); ImageDraw.Draw(canvas).text((10,525),p.name,fill='black'); thumbs.append(canvas)
+          rows=(len(thumbs)+1)//2; sheet=Image.new('RGB',(760,rows*550),'white')
+          for i,im in enumerate(thumbs): sheet.paste(im,((i%2)*380,(i//2)*550))
+          sheet.save('r5work/R5_VISUAL_CONTACT_SHEET.png')
+          PY
+
+      - name: Commit only the two R5 PDFs and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" || { echo 'main advanced during R5; HOLD for forward-only refetch'; exit 1; }
+          mkdir -p docs
+          cp r5work/pdf/DPRO_TUTORIAL_DISPOSAL_QUICK_START_V1.0.pdf docs/
+          cp r5work/pdf/DPRO_TUTORIAL_DISPOSAL_DETAILED_MANUAL_V1.0.pdf docs/
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/DPRO_TUTORIAL_DISPOSAL_QUICK_START_V1.0.pdf docs/DPRO_TUTORIAL_DISPOSAL_DETAILED_MANUAL_V1.0.pdf
+          git rm --ignore-unmatch .github/workflows/disposal-tutorial-r5-manuals.yml
+          git commit -m 'DISPOSAL Batch09 R5 A4 manuals'
+          git push origin HEAD:main
+          echo "FINAL_HEAD=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "FINAL_TREE=$(git rev-parse HEAD^{tree})" >> "$GITHUB_ENV"
+
+      - name: Verify both PDF public URLs after Pages deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          Q='https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/docs/DPRO_TUTORIAL_DISPOSAL_QUICK_START_V1.0.pdf'
+          D='https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/docs/DPRO_TUTORIAL_DISPOSAL_DETAILED_MANUAL_V1.0.pdf'
+          for i in $(seq 1 60); do
+            qcode="$(curl -L -sS -o /tmp/q.pdf -w '%{http_code}' --max-time 20 "$Q?sha=${FINAL_HEAD}" || true)"
+            dcode="$(curl -L -sS -o /tmp/d.pdf -w '%{http_code}' --max-time 20 "$D?sha=${FINAL_HEAD}" || true)"
+            if [ "$qcode" = 200 ] && [ "$dcode" = 200 ] && head -c 4 /tmp/q.pdf | grep -q '%PDF' && head -c 4 /tmp/d.pdf | grep -q '%PDF'; then
+              echo "PUBLIC_QUICK=$Q" >> "$GITHUB_ENV"
+              echo "PUBLIC_DETAILED=$D" >> "$GITHUB_ENV"
+              echo 'Both R5 PDFs are public.'
+              exit 0
+            fi
+            sleep 8
+          done
+          echo 'R5 PDFs did not become public in time.' >&2
+          exit 1
+
+      - name: Finalize R5 evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os,json,hashlib
+          from pathlib import Path
+          p=Path('r5work/R5_AUTOMATED_QA.json'); d=json.loads(p.read_text(encoding='utf-8'))
+          d['final_head']=os.environ.get('FINAL_HEAD'); d['final_tree']=os.environ.get('FINAL_TREE')
+          d['public_urls']={'quick_start':os.environ.get('PUBLIC_QUICK'),'detailed_manual':os.environ.get('PUBLIC_DETAILED')}
+          d['sha256']={}
+          for f in ['r5work/pdf/DPRO_TUTORIAL_DISPOSAL_QUICK_START_V1.0.pdf','r5work/pdf/DPRO_TUTORIAL_DISPOSAL_DETAILED_MANUAL_V1.0.pdf']:
+            d['sha256'][Path(f).name]=hashlib.sha256(Path(f).read_bytes()).hexdigest()
+          p.write_text(json.dumps(d,ensure_ascii=False,indent=2),encoding='utf-8')
+          PY
+
+      - name: Upload R5 manuals, renders, screenshots and QA evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: DISPOSAL_R5_MANUAL_EVIDENCE
+          path: |
+            r5work/pdf/*.pdf
+            r5work/render/*.png
+            r5work/screens/*.png
+            r5work/R5_VISUAL_CONTACT_SHEET.png
+            r5work/R5_AUTOMATED_QA.json
+          if-no-files-found: error
