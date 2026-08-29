@@ -1,0 +1,196 @@
+name: DISPOSAL Tutorial R3 LIVE QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'config.js'
+      - 'dpro-tutorial-r3.js'
+      - '.github/workflows/disposal-tutorial-r3-live-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  live-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+
+      - name: Wait for GitHub Pages deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/dpro-tutorial-r3.js"
+          for i in $(seq 1 45); do
+            BODY="$(curl -fsSL --max-time 15 "$URL?qa=${GITHUB_SHA}" || true)"
+            if printf '%s' "$BODY" | grep -q 'DPRO-TUTORIAL-DISPOSAL-B09-R3-V1.0-20260829'; then
+              echo "R3 asset is live."
+              exit 0
+            fi
+            sleep 8
+          done
+          echo "R3 asset did not become live in time." >&2
+          exit 1
+
+      - name: Run exact four-width LIVE QA
+        shell: bash
+        run: |
+          cat > /tmp/disposal-r3-qa.mjs <<'NODE'
+          import fs from 'node:fs';
+          import { chromium } from 'playwright';
+
+          const BASE='https://dpromstk2000-lab.github.io/dpro-disposal-line-liff/owner.html?demo=1&qa=r3live';
+          const viewports=[
+            {name:'pc_1440',width:1440,height:1000},
+            {name:'ipad_1024',width:1024,height:768},
+            {name:'mobile_390',width:390,height:844},
+            {name:'mobile_320',width:320,height:720}
+          ];
+          const expectedIds=Array.from({length:10},(_,i)=>`disposal-b09-ft10-${String(i+1).padStart(2,'0')}`);
+          const report={version:'R3-LIVE-QA-V1.0-20260829',base:BASE,sha:process.env.GITHUB_SHA,first10_count:10,viewports:[],overall:'PASS'};
+          const browser=await chromium.launch({headless:true});
+
+          async function load(ctx, vp) {
+            const page=await ctx.newPage();
+            const errors=[]; const consoleErrors=[]; const requests=[];
+            page.on('pageerror',e=>errors.push(String(e.message||e)));
+            page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
+            page.on('request',r=>requests.push({method:r.method(),url:r.url()}));
+            await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:45000});
+            await page.waitForSelector('#appView:not(.hidden)',{timeout:30000});
+            await page.waitForFunction(()=>window.DPRO_DISPOSAL_TUTORIAL_R3?.steps?.length===10,{timeout:20000});
+            return {page,errors,consoleErrors,requests};
+          }
+
+          async function inspectViewport(vp){
+            const ctx=await browser.newContext({viewport:{width:vp.width,height:vp.height},hasTouch:vp.width<=390,isMobile:false});
+            const {page,errors,consoleErrors,requests}=await load(ctx,vp);
+            await page.evaluate(()=>localStorage.removeItem('dpro_tutorial_disposal_b09_v1'));
+            await page.reload({waitUntil:'domcontentloaded'});
+            await page.waitForSelector('#appView:not(.hidden)',{timeout:30000});
+            await page.waitForFunction(()=>window.DPRO_DISPOSAL_TUTORIAL_R3?.steps?.length===10,{timeout:20000});
+            requests.length=0; errors.length=0; consoleErrors.length=0;
+
+            const result={name:vp.name,width:vp.width,height:vp.height,checks:{},steps:[],pageErrors:[],consoleErrors:[],unsafeWriteRequests:[]};
+            const dims=await page.evaluate(()=>({innerWidth,doc:document.documentElement.scrollWidth,body:document.body.scrollWidth}));
+            result.innerWidth=dims.innerWidth; result.documentScrollWidth=dims.doc; result.bodyScrollWidth=dims.body;
+            result.horizontalOverflow=Math.max(0,dims.doc-dims.innerWidth,dims.body-dims.innerWidth);
+            result.checks.overflow0=result.horizontalOverflow===0;
+            result.checks.first10Count=(await page.evaluate(()=>window.DPRO_DISPOSAL_TUTORIAL_R3.steps.length))===10;
+
+            await page.click('#dproTutLauncher');
+            for(let i=0;i<10;i++){
+              const id=(await page.textContent('.dproTutStepId'))?.trim();
+              const highlight=await page.$eval('#dproTutHighlight',e=>getComputedStyle(e).display!=='none');
+              result.steps.push({step:i+1,id,expected:expectedIds[i],highlight});
+              if(i<9) await page.click('.dproTutActions .primary');
+            }
+            result.checks.stepResolution=result.steps.every((s,i)=>s.id===expectedIds[i]&&s.highlight);
+
+            await page.click('.dproTutActions .back');
+            result.checks.back=(await page.textContent('.dproTutStepId'))?.trim()===expectedIds[8];
+            await page.click('.dproTutActions .primary');
+            result.checks.next=(await page.textContent('.dproTutStepId'))?.trim()===expectedIds[9];
+
+            await page.keyboard.press('Escape');
+            result.checks.esc=await page.$eval('#dproTutCard',e=>getComputedStyle(e).display==='none');
+            result.checks.focusRecoverable=(await page.evaluate(()=>document.activeElement?.id))==='dproTutLauncher';
+            await page.click('#dproTutLauncher');
+            result.checks.resume=(await page.textContent('.dproTutStepId'))?.trim()===expectedIds[9];
+
+            await page.click('.dproTutActions .skip');
+            result.checks.skip=(await page.textContent('#dproTutBody'))?.includes('スキップしました');
+            await page.click('.dproTutComplete .replay');
+            result.checks.replay=(await page.textContent('.dproTutStepId'))?.trim()===expectedIds[0];
+
+            const before=await page.$eval('#dproTutCard',e=>e.getBoundingClientRect().toJSON());
+            const h=await page.$eval('#dproTutHandle',e=>{const r=e.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2}});
+            await page.mouse.move(h.x,h.y); await page.mouse.down(); await page.mouse.move(h.x+70,h.y+45,{steps:5}); await page.mouse.up();
+            const after=await page.$eval('#dproTutCard',e=>e.getBoundingClientRect().toJSON());
+            result.checks.mousePointerDrag=Math.abs(after.left-before.left)>10||Math.abs(after.top-before.top)>10;
+
+            const touchStart=await page.$eval('#dproTutHandle',e=>{const r=e.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2}});
+            await page.dispatchEvent('#dproTutHandle','pointerdown',{pointerId:77,pointerType:'touch',isPrimary:true,clientX:touchStart.x,clientY:touchStart.y,button:0,buttons:1});
+            await page.dispatchEvent('#dproTutHandle','pointermove',{pointerId:77,pointerType:'touch',isPrimary:true,clientX:touchStart.x-45,clientY:touchStart.y+35,button:0,buttons:1});
+            await page.dispatchEvent('#dproTutHandle','pointerup',{pointerId:77,pointerType:'touch',isPrimary:true,clientX:touchStart.x-45,clientY:touchStart.y+35,button:0,buttons:0});
+            const afterTouch=await page.$eval('#dproTutCard',e=>e.getBoundingClientRect().toJSON());
+            result.checks.touchPointerDrag=Math.abs(afterTouch.left-after.left)>5||Math.abs(afterTouch.top-after.top)>5;
+
+            const far=await page.$eval('#dproTutHandle',e=>{const r=e.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2}});
+            await page.dispatchEvent('#dproTutHandle','pointerdown',{pointerId:88,pointerType:'touch',isPrimary:true,clientX:far.x,clientY:far.y,button:0,buttons:1});
+            await page.dispatchEvent('#dproTutHandle','pointermove',{pointerId:88,pointerType:'touch',isPrimary:true,clientX:vp.width+1000,clientY:vp.height+1000,button:0,buttons:1});
+            await page.dispatchEvent('#dproTutHandle','pointerup',{pointerId:88,pointerType:'touch',isPrimary:true,clientX:vp.width+1000,clientY:vp.height+1000,button:0,buttons:0});
+            const clamped=await page.$eval('#dproTutCard',e=>e.getBoundingClientRect().toJSON());
+            result.checks.viewportClamp=clamped.left>=0&&clamped.top>=0&&clamped.right<=vp.width+0.5&&clamped.bottom<=vp.height+0.5;
+
+            await page.evaluate(()=>window.DPRO_DISPOSAL_TUTORIAL_R3.replay());
+            for(let i=0;i<10;i++) await page.keyboard.press('Enter');
+            result.checks.keyboardOnly=(await page.textContent('#dproTutBody'))?.includes('First10 完了');
+
+            await page.evaluate(()=>window.DPRO_DISPOSAL_TUTORIAL_R3.goTo(6));
+            await page.evaluate(()=>window.DPRO_DISPOSAL_TUTORIAL_R3.close());
+            await page.reload({waitUntil:'domcontentloaded'});
+            await page.waitForSelector('#appView:not(.hidden)',{timeout:30000});
+            await page.waitForFunction(()=>window.DPRO_DISPOSAL_TUTORIAL_R3?.steps?.length===10,{timeout:20000});
+            await page.click('#dproTutLauncher');
+            result.checks.persistentResume=(await page.textContent('.dproTutStepId'))?.trim()===expectedIds[6];
+
+            result.pageErrors=[...errors]; result.consoleErrors=[...consoleErrors];
+            result.unsafeWriteRequests=requests.filter(r=>['POST','PUT','PATCH','DELETE'].includes(r.method)&&!/\/api\/auth\//.test(r.url));
+            result.checks.pageError0=result.pageErrors.length===0;
+            result.checks.consoleError0=result.consoleErrors.length===0;
+            result.checks.unsafeWrite0=result.unsafeWriteRequests.length===0;
+            result.checks.businessMutation0=result.unsafeWriteRequests.length===0;
+            result.pass=Object.values(result.checks).every(Boolean);
+            await ctx.close(); return result;
+          }
+
+          for(const vp of viewports){
+            const r=await inspectViewport(vp); report.viewports.push(r); if(!r.pass) report.overall='FAIL';
+          }
+          report.gates={
+            FIRST10_COUNT:10,
+            MOUSE_POINTER_DRAG:report.viewports.every(x=>x.checks.mousePointerDrag)?'PASS':'FAIL',
+            TOUCH_POINTER_DRAG:report.viewports.every(x=>x.checks.touchPointerDrag)?'PASS':'FAIL',
+            VIEWPORT_CLAMP:report.viewports.every(x=>x.checks.viewportClamp)?'PASS':'FAIL',
+            NEXT_BACK:report.viewports.every(x=>x.checks.next&&x.checks.back)?'PASS':'FAIL',
+            ESC_CLOSE:report.viewports.every(x=>x.checks.esc)?'PASS':'FAIL',
+            SKIP:report.viewports.every(x=>x.checks.skip)?'PASS':'FAIL',
+            RESUME:report.viewports.every(x=>x.checks.resume&&x.checks.persistentResume)?'PASS':'FAIL',
+            REPLAY:report.viewports.every(x=>x.checks.replay)?'PASS':'FAIL',
+            KEYBOARD_ONLY:report.viewports.every(x=>x.checks.keyboardOnly)?'PASS':'FAIL',
+            FOCUS_VISIBLE_RECOVERABLE:report.viewports.every(x=>x.checks.focusRecoverable)?'PASS':'FAIL',
+            PAGEERROR_0:report.viewports.every(x=>x.checks.pageError0)?'PASS':'FAIL',
+            CONSOLE_ERROR_0:report.viewports.every(x=>x.checks.consoleError0)?'PASS':'FAIL',
+            UNSAFE_WRITE_REQUEST_0:report.viewports.every(x=>x.checks.unsafeWrite0)?'PASS':'FAIL',
+            BUSINESS_MUTATION_0:report.viewports.every(x=>x.checks.businessMutation0)?'PASS':'FAIL'
+          };
+          fs.writeFileSync('R3_LIVE_QA_EVIDENCE.json',JSON.stringify(report,null,2));
+          console.log(JSON.stringify(report,null,2));
+          await browser.close();
+          if(report.overall!=='PASS') process.exit(1);
+          NODE
+          node /tmp/disposal-r3-qa.mjs
+
+      - name: Upload R3 QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: DISPOSAL_R3_LIVE_QA_EVIDENCE
+          path: R3_LIVE_QA_EVIDENCE.json
+          if-no-files-found: error
