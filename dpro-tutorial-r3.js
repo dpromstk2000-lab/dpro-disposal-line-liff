@@ -1,4 +1,4 @@
-/* DPRO TUTORIAL / DISPOSAL / BATCH-09 / R3 / STANDARD V1.2 / KEYBOARD-FOCUS FIX */
+/* DPRO TUTORIAL / DISPOSAL / BATCH-09 / R3 / STANDARD V1.3 / KEYBOARD ENTER FIX */
 (() => {
   'use strict';
   const VERSION = 'DPRO-TUTORIAL-DISPOSAL-B09-R3-V1.0-20260829';
@@ -157,6 +157,11 @@
   const resume = () => { lastFocus=document.activeElement; const s=readState(); renderStep(s.status==='in_progress'?s.step:0); };
 
   launcher.addEventListener('click',()=>{const s=readState(); if(s.status==='completed'||s.status==='skipped') replay(); else if(s.status==='in_progress') resume(); else start();});
+  card.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&e.target instanceof HTMLElement&&e.target.matches('.dproTutActions .primary')){
+      e.preventDefault();e.stopPropagation();e.target.click();
+    }
+  });
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&card.style.display==='block'){e.preventDefault();close();}});
   addEventListener('scroll',()=>requestAnimationFrame(updateHighlight),true);
   addEventListener('resize',()=>{requestAnimationFrame(()=>{const r=card.getBoundingClientRect();if(card.style.display==='block')applyCardPosition(r.left,r.top,false);updateHighlight();});});
