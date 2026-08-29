@@ -1,4 +1,4 @@
-/* DPRO TUTORIAL / DISPOSAL / BATCH-09 / R3 / STANDARD V1.3 / KEYBOARD ENTER FIX */
+/* DPRO TUTORIAL / DISPOSAL / BATCH-09 / R3-R4 / STANDARD V1.4 / GUIDE ENTRY BRIDGE */
 (() => {
   'use strict';
   const VERSION = 'DPRO-TUTORIAL-DISPOSAL-B09-R3-V1.0-20260829';
@@ -178,4 +178,40 @@
   window.DPRO_DISPOSAL_TUTORIAL_R3 = Object.freeze({VERSION,STORAGE_KEY,steps,start,resume,replay,open,close,goTo:(n)=>renderStep(Math.max(0,Math.min(steps.length-1,Number(n)||0))),getState:readState});
   document.documentElement.dataset.dproTutorialR3=VERSION;
   syncLauncher();
+
+  // R4 Guide Center bridge: uses the same R3 state machine and storage only.
+  const runGuideEntry = () => {
+    const params = new URLSearchParams(location.search);
+    const action = params.get('tutorial');
+    if (!['start','resume','replay','step'].includes(action || '')) return;
+    let attempts = 0;
+    const execute = () => {
+      const appReady = !!document.querySelector('#appView:not(.hidden)');
+      if (!appReady && attempts++ < 150) { setTimeout(execute, 100); return; }
+      params.delete('tutorial'); params.delete('step');
+      const qs = params.toString();
+      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+      if (action === 'start') start();
+      else if (action === 'resume') resume();
+      else if (action === 'replay') replay();
+      else {
+        const n = Math.max(0, Math.min(steps.length - 1, Number(new URLSearchParams(location.search).get('step')) || 0));
+        renderStep(n);
+      }
+    };
+    // Preserve requested step before query cleanup.
+    const requestedStep = Math.max(0, Math.min(steps.length - 1, Number(params.get('step')) || 0));
+    if (action === 'step') {
+      const executeStep = () => {
+        const appReady = !!document.querySelector('#appView:not(.hidden)');
+        if (!appReady && attempts++ < 150) { setTimeout(executeStep, 100); return; }
+        params.delete('tutorial'); params.delete('step');
+        const qs = params.toString();
+        history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+        renderStep(requestedStep);
+      };
+      executeStep();
+    } else execute();
+  };
+  runGuideEntry();
 })();
